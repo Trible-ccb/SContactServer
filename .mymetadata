@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="scontacts"
+  id="myeclipse.1396265743755"
+  context-root="/scontacts"
+  j2ee-spec="6.0"
+  archive="scontacts.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+
