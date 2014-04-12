@@ -21,8 +21,10 @@ public class DaoImplHelper{
 	         t = s.beginTransaction();
 	         result = handler.handleSession(s);   
 	         t.commit();  
-        }catch(Exception err){  
-	        t.rollback();  
+        }catch(Exception err){
+        	if ( t != null ){
+        		t.rollback();  
+        	}
 	        err.printStackTrace();  
         }finally{  
         	s.close();  
