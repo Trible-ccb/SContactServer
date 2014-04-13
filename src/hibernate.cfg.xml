@@ -10,18 +10,14 @@
 	<property name="dialect">
 		org.hibernate.dialect.MySQLDialect
 	</property>
-	<!-- test
-		<property name="connection.url">
+
+	<property name="connection.url">
 		jdbc:mysql://localhost:1206/social_contact
 	</property>
 	<property name="connection.username">trible-ccb</property>
 	<property name="connection.password">trible_ccb</property>
-	 -->
-	<property name="connection.url">
-		jdbc:mysql://sqld.duapp.com:4050/EenSJJUYLDvhYNgIdBxS
-	</property>
-	<property name="connection.username">G3meR3Rr1GVeFE6KWROLKS8N</property>
-	<property name="connection.password">hLrxRQsx1FMMiao7imqLe5LpbgmhA2N5</property>
+
+ 
 	<property name="connection.driver_class">
 		com.mysql.jdbc.Driver
 	</property>
