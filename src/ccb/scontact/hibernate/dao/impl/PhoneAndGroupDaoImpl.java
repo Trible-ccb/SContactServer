@@ -93,7 +93,9 @@ public class PhoneAndGroupDaoImpl implements IPhoneAndGroupDao{
 
 	@Override
 	public BaseInfo checkPhoneAndGroupInfo(final PhoneAndGroupInfo info) {
-		if ( !PhoneAndGroupInfo.isValid(info) )return GlobalValue.MESSAGES.get(GlobalValue.STR_INVALID_REQUEST);
+		if ( info==null
+				|| info.getGroupId() == null
+				|| info.getUserId() == null )return GlobalValue.MESSAGES.get(GlobalValue.STR_INVALID_REQUEST);
 		BaseInfo result = null;
 		result = DaoImplHelper.doTask(new IDaoHandler<BaseInfo>() {
 
