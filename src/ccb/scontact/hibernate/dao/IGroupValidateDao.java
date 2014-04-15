@@ -10,5 +10,8 @@ public interface IGroupValidateDao {
 	String TABLE_NAME = "group_validate";
 	BaseInfo addOneValidate(GroupValidateInfo info);
 	BaseInfo deleteOneValidate(GroupValidateInfo info);
+	
+	//BaseInfo GetOneValidate(Long infoId,Long EndInfoId);
+	
 	List<GroupValidateInfo> getMyValidateList(GroupValidateInfo info);
 }
