@@ -89,7 +89,7 @@ public class GroupApi {
 	public BaseInfo addGroup(
 			@QueryParam("json") String json
 			,@QueryParam("contactIds") String json2
-			) {
+			) {		
  		GroupInfo info;
  		BaseInfo  result;
  		IGroupDao icd = new GroupDaoImpl();
@@ -97,6 +97,7 @@ public class GroupApi {
  		try {
 			info = new Gson().fromJson(json, GroupInfo.class);
 			PhoneAndGroupInfo info2 = new Gson().fromJson(json2, PhoneAndGroupInfo.class);
+			
 			result = icd.createGroup(info,info2);
 			if ( result != null ){
 				return result;
@@ -151,6 +152,7 @@ public class GroupApi {
  		BaseInfo  result = null;
  		IGroupDao icd = new GroupDaoImpl();
  		ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_GROUP_ERROR);
+ 		
  		try {
 			info = new Gson().fromJson(json, GroupInfo.class);
 			if ( info != null ){
@@ -167,6 +169,8 @@ public class GroupApi {
 			return msg;
 		}
 	}
+	
+	
 	
 	@POST
 	@Path("/get_all_groups")

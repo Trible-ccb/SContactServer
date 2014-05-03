@@ -29,8 +29,6 @@ public class PhoneAndGroupInfo extends BaseInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private Long id;
 	private Long groupId;
-	@Deprecated
-	private Long contactId;
 	private Long userId;
 	private String contactIds;
 	
@@ -55,14 +53,6 @@ public class PhoneAndGroupInfo extends BaseInfo implements Serializable{
 	}
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
-	}
-	
-	@Column(name = "raw_phone_number_id")
-	public Long getContactId() {
-		return contactId;
-	}
-	public void setContactId(Long contactId) {
-		this.contactId = contactId;
 	}
 	
 	@Column(name = "contact_ids")
@@ -92,7 +82,6 @@ public class PhoneAndGroupInfo extends BaseInfo implements Serializable{
 	}
 	public static void main(String[] arg){
 		PhoneAndGroupInfo test = new PhoneAndGroupInfo();
-		test.setContactId(1L);
 		test.setContactIds("[63]");
 		test.setGroupId(1L);
 		test.setUserId(1L);

@@ -26,9 +26,15 @@ public class ContactInfo extends BaseInfo implements Serializable{
 	private String contact;
 	private Integer status;
 	private Long lastestUsedTime;
+	private Integer type;
 	
-	
-
+	@Column(name = "type")
+	public Integer getType() {
+		return type;
+	}
+	public void setType(Integer type) {
+		this.type = type;
+	}
 	@GenericGenerator(name = "generator", strategy = "increment")
 	@Id
 	@GeneratedValue(generator = "generator")

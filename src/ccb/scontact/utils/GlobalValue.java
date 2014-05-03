@@ -52,11 +52,20 @@ public class GlobalValue {
 	public static final int CODE_PHONE_GROUP_ERROR = 5000;
 	public static final String STR_PHONE_GROUP_ERROR  = "ERROR BETWEEN PHONE AND GROUP";
 	
+	
+	// for group validate
+		public static final int CODE_GROUP_VALIDATE_ERROR = 1;
+		public static final String STR_GROUP_VALIDATE_ERROR  = "GROUP_VALIDATE ERROR";
+	
+	
 	public static HashMap<String, ErrorInfo> MESSAGES = new HashMap<String, ErrorInfo>();
 	private static void putMessage(int code,String msg){
 		MESSAGES.put(msg, new ErrorInfo(code, msg));
 	}
 	static{
+		putMessage(CODE_GROUP_VALIDATE_ERROR,STR_GROUP_VALIDATE_ERROR);
+		
+		
 		putMessage(CODE_INVALID_REQUEST, STR_INVALID_REQUEST);
 		putMessage(CODE_LOGIN_ERROR, STR_LOGIN_ERROR);
 		putMessage(CODE_REGISTER_ERROR,STR_REGISTER_ERROR);
