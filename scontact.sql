@@ -1,16 +1,16 @@
 /*
 Navicat MySQL Data Transfer
 
-Source Server         : ycc
-Source Server Version : 50617
-Source Host           : localhost:3306
-Source Database       : scontact
+Source Server         : TribleDB
+Source Server Version : 50616
+Source Host           : 127.0.0.1:1206
+Source Database       : social_contact
 
 Target Server Type    : MYSQL
-Target Server Version : 50617
+Target Server Version : 50616
 File Encoding         : 65001
 
-Date: 2014-04-15 23:36:44
+Date: 2014-05-04 17:38:09
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -31,7 +31,7 @@ CREATE TABLE `groupsinfo` (
   `group_update_time` bigint(20) DEFAULT NULL,
   `group_identify` int(11) DEFAULT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of groupsinfo
@@ -41,7 +41,8 @@ INSERT INTO `groupsinfo` VALUES ('3', 'group2', null, 'normal', '1', '100', '0',
 INSERT INTO `groupsinfo` VALUES ('4', '测试', null, 'normal', '4', '50', '0', '1397136648336', '1397136648336', '1');
 INSERT INTO `groupsinfo` VALUES ('5', '测试2', null, 'normal', '4', '50', '0', '1397136779175', '1397136779175', '1');
 INSERT INTO `groupsinfo` VALUES ('6', '我的额', null, 'normal', '5', '50', '0', '1397137982135', '1397137982135', '1');
-INSERT INTO `groupsinfo` VALUES ('7', '0508', null, 'normal', '6', '50', '0', '1397138049813', '1397138049813', '1');
+INSERT INTO `groupsinfo` VALUES ('7', '0508', null, 'normal', '6', '50', '1', '1397138049813', '1397138049813', '1');
+INSERT INTO `groupsinfo` VALUES ('8', '524', null, 'normal', '9', '50', '1', '1399193302613', '1399193302613', '1');
 
 -- ----------------------------
 -- Table structure for group_validate
@@ -52,7 +53,7 @@ CREATE TABLE `group_validate` (
   `start_user_id` bigint(20) NOT NULL,
   `group_id` bigint(20) DEFAULT NULL,
   `contact_ids` text COLLATE utf8_latvian_ci,
-  `end_user_id bigint` bigint(20) DEFAULT NULL,
+  `end_user_id` bigint(20) DEFAULT NULL,
   `is_group_to_user` varchar(1) COLLATE utf8_latvian_ci NOT NULL,
   PRIMARY KEY (`id`,`is_group_to_user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_latvian_ci;
@@ -60,6 +61,7 @@ CREATE TABLE `group_validate` (
 -- ----------------------------
 -- Records of group_validate
 -- ----------------------------
+INSERT INTO `group_validate` VALUES ('2', '6', '4', '[6]', '4', '0');
 
 -- ----------------------------
 -- Table structure for phone_group_info
@@ -73,7 +75,7 @@ CREATE TABLE `phone_group_info` (
   PRIMARY KEY (`id`),
   KEY `group_fk` (`group_id`),
   CONSTRAINT `group_fk` FOREIGN KEY (`group_id`) REFERENCES `groupsinfo` (`group_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of phone_group_info
@@ -83,6 +85,9 @@ INSERT INTO `phone_group_info` VALUES ('2', '4', '4', '[4]');
 INSERT INTO `phone_group_info` VALUES ('3', '5', '4', '[4]');
 INSERT INTO `phone_group_info` VALUES ('4', '6', '5', '[5]');
 INSERT INTO `phone_group_info` VALUES ('5', '7', '6', '[6]');
+INSERT INTO `phone_group_info` VALUES ('6', '3', '6', '[6]');
+INSERT INTO `phone_group_info` VALUES ('8', '8', '9', '[15]');
+INSERT INTO `phone_group_info` VALUES ('9', '7', '9', '[15]');
 
 -- ----------------------------
 -- Table structure for raw_phone_numbers
