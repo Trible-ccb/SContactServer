@@ -32,13 +32,7 @@ public class PhoneAndGroupDaoImpl implements IPhoneAndGroupDao{
 				//check whether the contact exist
 				BaseInfo pag = checkPhoneAndGroupInfo(info);
 				if ( !(pag instanceof ErrorInfo) ){
-					List<Long> contacts = null;
-					TypeToken<List<Long>> tt = new TypeToken<List<Long>>(){};
-					try {
-						contacts = new Gson().fromJson(info.getContactIds(), tt.getType());
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+					List<Long> contacts = ContactInfo.stringToList(info.getContactIds());
 					if ( ListUtil.isEmpty(contacts) ){//do not allow empty contacts
 						return msg;
 					} else {
@@ -71,7 +65,7 @@ public class PhoneAndGroupDaoImpl implements IPhoneAndGroupDao{
 	@Override
 	public BaseInfo exitGroup(final PhoneAndGroupInfo info) {
 		final ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_INVALID_REQUEST);
-		if ( !PhoneAndGroupInfo.isValid(info) ){
+		if ( info == null ){
 			return msg;
 		}
 		BaseInfo result =
@@ -120,7 +114,7 @@ public class PhoneAndGroupDaoImpl implements IPhoneAndGroupDao{
 				String hql = " FROM PhoneAndGroupInfo"
 						+ " WHERE group_id = '" + gid + "'";
 		         Query query = s.createQuery(hql);    
-		         query.setCacheable(true); // ÉèÖÃ»º´æ    
+		         query.setCacheable(true); // ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½    
 		         List<PhoneAndGroupInfo> uesrs = query.list();
 				return uesrs;
 			}
@@ -139,7 +133,7 @@ public class PhoneAndGroupDaoImpl implements IPhoneAndGroupDao{
 						+ " WHERE user_id = '" + uid + "'"
 						+ " AND group_id = '" + gid + "'";
 		         Query query = s.createQuery(hql);    
-		         query.setCacheable(true); // ÉèÖÃ»º´æ    
+		         query.setCacheable(true); // ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½    
 		         PhoneAndGroupInfo uesrs = (PhoneAndGroupInfo) query.uniqueResult();
 				return uesrs;
 			}

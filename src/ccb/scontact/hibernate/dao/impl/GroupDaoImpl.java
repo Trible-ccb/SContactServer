@@ -47,7 +47,7 @@ public class GroupDaoImpl implements IGroupDao {
 							info.setStatus(GlobalValue.GSTATUS_USED);
 						}
 						if ( info.getIdentify() == null ){
-							info.setIdentify(GlobalValue.GIDENTIFY_PUBLICE);
+							info.setIdentify(GlobalValue.GIDENTIFY_NONE);
 						}
 						if ( info.getType() == null ){
 							info.setType(GlobalValue.GTYPE_NORMAL);
@@ -143,7 +143,7 @@ public class GroupDaoImpl implements IGroupDao {
 			public List<GroupInfo> handleSession(Session s) {
 				String hql = "FROM GroupInfo";    
 				Query query = s.createQuery(hql);    
-				query.setCacheable(true); // ÉèÖÃ»º´æ    
+				query.setCacheable(true); // ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½    
 				return  query.list();
 			}
 		});

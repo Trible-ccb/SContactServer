@@ -34,9 +34,10 @@ public class GroupValidateImpl implements IGroupValidateDao {
 		result = DaoImplHelper.doTask(new IDaoHandler<BaseInfo> () {
 			@Override
 			public BaseInfo handleSession(Session s) {
-				String hql = "delete FROM group_validate"
-						+ " WHERE id = '" + info.getId()+"'";
-				s.createQuery(hql);
+//				String hql = "delete FROM group_validate"
+//						+ " WHERE id = '" + info.getId()+"'";
+//				s.createQuery(hql).executeUpdate();
+				s.delete(info);
 				return info;
 			}
 		});
@@ -50,10 +51,10 @@ public class GroupValidateImpl implements IGroupValidateDao {
 			@Override
 			public List<GroupValidateInfo> handleSession(Session s) {
 				
-				String hql = "FROM group_validate"
+				String hql = "FROM GroupValidateInfo"
 						+ " WHERE end_user_id = '" + info.getEnd_user_id()+"'";
 				Query query = s.createQuery(hql);
-				query.setCacheable(true); // ÉèÖÃ»º´æ    
+				query.setCacheable(true); // ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½    
 		         List<GroupValidateInfo> MyValidateList = query.list();
 		         
 		         return MyValidateList;

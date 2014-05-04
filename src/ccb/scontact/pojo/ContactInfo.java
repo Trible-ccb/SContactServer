@@ -1,6 +1,7 @@
 package ccb.scontact.pojo;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +12,9 @@ import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hibernate.annotations.GenericGenerator;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import ccb.scontact.hibernate.dao.IContactDao;
 import ccb.scontact.utils.StringUtil;
@@ -84,5 +88,17 @@ public class ContactInfo extends BaseInfo implements Serializable{
 		if ( info == null || info.getContact() == null )return false;
 		if ( StringUtil.isValidPhone(info.getContact() ) )return true;
 		return false;
+	}
+	@Transient
+	public static List<Long> stringToList(String contactids){
+		List<Long> contacts = null;
+		TypeToken<List<Long>> tt = new TypeToken<List<Long>>(){};
+		try {
+			contacts = new Gson().fromJson(contactids, tt.getType());
+			return contacts;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

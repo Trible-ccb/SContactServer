@@ -17,7 +17,7 @@
 	<property name="connection.username">trible-ccb</property>
 	<property name="connection.password">trible_ccb</property>
 
- 
+
 	<property name="connection.driver_class">
 		com.mysql.jdbc.Driver
 	</property>
@@ -32,6 +32,7 @@
 	<mapping class="ccb.scontact.pojo.ContactInfo" />
 	<mapping class="ccb.scontact.pojo.GroupInfo" />
 	<mapping class="ccb.scontact.pojo.PhoneAndGroupInfo" />
+	<mapping class="ccb.scontact.pojo.GroupValidateInfo" />
 </session-factory>
 
 </hibernate-configuration>

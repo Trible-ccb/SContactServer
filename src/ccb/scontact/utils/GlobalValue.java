@@ -125,8 +125,8 @@ public class GlobalValue {
 	public static final Integer GSTATUS_NULL = null;
 	
 //	identify : 0 or null no identify ,1 need identify msg when user join in 
-	public static final Integer GIDENTIFY_PUBLICE = 0;
-	public static final Integer GIDENTIFY_PRIVATE = 1;
+	public static final Integer GIDENTIFY_NONE = 0;
+	public static final Integer GIDENTIFY_NEEDED = 1;
 	public static final Integer GIDENTIFY_NULL = null;
 	
 //	searchable : 
