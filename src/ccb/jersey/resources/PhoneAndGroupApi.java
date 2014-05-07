@@ -91,9 +91,7 @@ public class PhoneAndGroupApi {
 			IPhoneAndGroupDao icd = new PhoneAndGroupDaoImpl();
 			if ( info instanceof PhoneAndGroupInfo ){
 				result = icd.checkPhoneAndGroupInfo(info);
-				if ( result != null ){
-					return result;
-				}
+				return result;
 			}
 		} catch (Exception e) {
 			msg.setMessgae(e.getMessage());

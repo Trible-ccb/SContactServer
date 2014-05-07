@@ -2,8 +2,6 @@ package ccb.scontact.hibernate.dao.impl;
 
 import org.hibernate.Session;
 
-import com.sun.xml.bind.v2.TODO;
-
 import ccb.scontact.hibernate.dao.IGroupDao;
 import ccb.scontact.hibernate.dao.IGroupValidateDao;
 import ccb.scontact.hibernate.dao.IPhoneAndGroupDao;
@@ -11,14 +9,14 @@ import ccb.scontact.hibernate.dao.IRelationshipDao;
 import ccb.scontact.hibernate.dao.impl.DaoImplHelper.IDaoHandler;
 import ccb.scontact.pojo.BaseInfo;
 import ccb.scontact.pojo.GroupInfo;
-import ccb.scontact.pojo.GroupValidateInfo;
 import ccb.scontact.pojo.PhoneAndGroupInfo;
+import ccb.scontact.pojo.ValidateInfo;
 import ccb.scontact.utils.GlobalValue;
 
 public class RelationshipImpl implements IRelationshipDao {
 
 	@Override
-	public BaseInfo addRelationship(final GroupValidateInfo info) {
+	public BaseInfo addRelationship(final ValidateInfo info) {
 		if ( info == null )return null;
 		
 		BaseInfo result  = null;
@@ -43,11 +41,16 @@ public class RelationshipImpl implements IRelationshipDao {
 								phoneinfo.setUserId(info.getEnd_user_id());
 							else
 								phoneinfo.setUserId(info.getStart_user_id());
-							return ipgd.joinOrUpdateInGroup(phoneinfo);
+								ipgd.joinOrUpdateInGroup(phoneinfo);
+								if ( info.getId() == null ){
+									info.setId(0L);//actually info is not exist,the id only is a success flag
+								}
+								return info;
 						}
 					}
 				} else {//relationship between user and user;
-//					TODO 
+					IGroupValidateDao igvd = new GroupValidateImpl();
+					return igvd.addOneValidate(info);
 				}
 				return null;
 			}
@@ -56,7 +59,13 @@ public class RelationshipImpl implements IRelationshipDao {
 	}
 
 	@Override
-	public BaseInfo removeRelationship(GroupValidateInfo info) {
+	public BaseInfo removeRelationship(ValidateInfo info) {
+		return null;
+	}
+
+	@Override
+	public BaseInfo changeRelationship(ValidateInfo info) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

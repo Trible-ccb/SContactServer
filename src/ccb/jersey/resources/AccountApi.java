@@ -6,11 +6,14 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import ccb.scontact.hibernate.dao.IUserRelationshipDao;
 import ccb.scontact.hibernate.dao.impl.AccountDaoImpl;
+import ccb.scontact.hibernate.dao.impl.UserRelationshipImpl;
 import ccb.scontact.pojo.AccountInfo;
 import ccb.scontact.pojo.BaseInfo;
 import ccb.scontact.pojo.ErrorInfo;
 import ccb.scontact.pojo.GroupInfo;
+import ccb.scontact.pojo.UserRelationshipInfo;
 import ccb.scontact.utils.GlobalValue;
 
 import com.google.gson.Gson;
@@ -138,6 +141,51 @@ public class AccountApi {
 		}
 	}
 	
+	@POST
+	@Path("/checkIsFriend")
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseInfo checkIsFriend(
+			@QueryParam("json") String json) {
+		UserRelationshipInfo info;
+ 		BaseInfo  result = null;
+ 		IUserRelationshipDao iurd = new UserRelationshipImpl();
+ 		ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_DELETE_ERROR);
+ 		try {
+			info = new Gson().fromJson(json, UserRelationshipInfo.class);
+			result = iurd.checkUserRelationshipInfo(info);
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+			msg.setMessgae(e.getMessage());
+			return msg;
+		}
+	}
+	
+	/**
+	 * @param json {"id":?}
+	 * @return
+	 */
+	@POST
+	@Path("/get_friends_of_user")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Object getFriendsOfUser(
+			@QueryParam("json") String json) {
+ 		AccountDaoImpl adi = new AccountDaoImpl();
+ 		ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_INVALID_REQUEST);
+ 		try {
+			AccountInfo info = new Gson().fromJson(json, AccountInfo.class);
+			if ( info != null && info.getId() != null ){
+				return adi.getFriendsOfUser(info.getId());
+			} else {
+				return msg;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			msg.setMessgae(e.getMessage());
+			return msg;
+		}
+	}
+	
 	/**
 	 * @param json {"id":?}
 	 * @return
@@ -153,6 +201,30 @@ public class AccountApi {
 			GroupInfo info = new Gson().fromJson(json, GroupInfo.class);
 			if ( info != null && info.getId() != null ){
 				return adi.getAccountsOfGroup(info.getId());
+			} else {
+				return msg;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			msg.setMessgae(e.getMessage());
+			return msg;
+		}
+	}
+	
+	/**
+	 * @param json {"id":?}
+	 * @return
+	 */
+	@POST
+	@Path("/search_account_infos")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Object searchAccountInfo(
+			@QueryParam("query") String query) {
+ 		AccountDaoImpl adi = new AccountDaoImpl();
+ 		ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_INVALID_REQUEST);
+ 		try {
+			if ( query != null ){
+				return adi.searchAccountInfo(query, true);
 			} else {
 				return msg;
 			}

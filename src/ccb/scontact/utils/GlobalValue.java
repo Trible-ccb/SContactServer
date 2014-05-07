@@ -54,8 +54,8 @@ public class GlobalValue {
 	
 	
 	// for group validate
-		public static final int CODE_GROUP_VALIDATE_ERROR = 1;
-		public static final String STR_GROUP_VALIDATE_ERROR  = "GROUP_VALIDATE ERROR";
+		public static final int CODE_VALIDATE_ERROR = 1;
+		public static final String STR_VALIDATE_ERROR  = "VALIDATE ERROR";
 	
 	
 	public static HashMap<String, ErrorInfo> MESSAGES = new HashMap<String, ErrorInfo>();
@@ -63,7 +63,7 @@ public class GlobalValue {
 		MESSAGES.put(msg, new ErrorInfo(code, msg));
 	}
 	static{
-		putMessage(CODE_GROUP_VALIDATE_ERROR,STR_GROUP_VALIDATE_ERROR);
+		putMessage(CODE_VALIDATE_ERROR,STR_VALIDATE_ERROR);
 		
 		
 		putMessage(CODE_INVALID_REQUEST, STR_INVALID_REQUEST);

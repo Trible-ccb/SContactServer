@@ -14,7 +14,8 @@ public interface IAccountDao {
 	BaseInfo loginAccount(AccountInfo info);
 	BaseInfo getAccountInfo(Long id);
 	BaseInfo deleteAccountInfo(Long id);
-	BaseInfo searchAccountInfo(String query);
+	List<AccountInfo> searchAccountInfo(String query,boolean like);
 	List<AccountInfo> getAllAccount();
 	List<AccountInfo> getAccountsOfGroup(Long gid);
+	List<AccountInfo> getFriendsOfUser(Long uid);
 }

@@ -17,12 +17,14 @@ import ccb.scontact.hibernate.HibernateSessionFactory;
 import ccb.scontact.hibernate.dao.IAccountDao;
 import ccb.scontact.hibernate.dao.IContactDao;
 import ccb.scontact.hibernate.dao.IPhoneAndGroupDao;
+import ccb.scontact.hibernate.dao.IUserRelationshipDao;
 import ccb.scontact.hibernate.dao.impl.DaoImplHelper.IDaoHandler;
 import ccb.scontact.pojo.AccountInfo;
 import ccb.scontact.pojo.BaseInfo;
 import ccb.scontact.pojo.ContactInfo;
 import ccb.scontact.pojo.ErrorInfo;
 import ccb.scontact.pojo.PhoneAndGroupInfo;
+import ccb.scontact.pojo.UserRelationshipInfo;
 import ccb.scontact.utils.GlobalValue;
 import ccb.scontact.utils.ListUtil;
 import ccb.scontact.utils.StringUtil;
@@ -39,12 +41,10 @@ public class AccountDaoImpl implements IAccountDao {
 			@Override
 			public BaseInfo handleSession(Session s) {
 				//check whether the info exists or not;
-				BaseInfo existName = searchAccountInfo(info.getDisplayName());
-				if ( existName instanceof AccountInfo ){
+				List<AccountInfo> existnames = searchAccountInfo(info.getDisplayName(),false);
+				if ( ListUtil.isNotEmpty(existnames) ){
 					return GlobalValue.MESSAGES.get(GlobalValue.STR_NAME_UNAVAILABAL);
-				} else if ( existName instanceof ErrorInfo ){
-					return existName;
-				} else {//add a new user
+				}  else {//add a new user
 					info.setId(null);//auto add;
 					info.setCreateTime(System.currentTimeMillis());
 					if ( info.getGender() == null ){
@@ -88,47 +88,32 @@ public class AccountDaoImpl implements IAccountDao {
 	}
 
 	@Override
-	public BaseInfo updateAccount(AccountInfo info) {
-		SessionFactory sf = HibernateSessionFactory.getSessionFactory();
-		Session session = null;
-		Transaction tran = null;
-		try {
-			session = sf.openSession();
-			tran = session.beginTransaction();
-			session.update(info);
-			tran.commit();
-		} catch (Exception e) {
-			tran.rollback();
-			e.printStackTrace();
-		} finally {
-			session.close();
-		}
+	public BaseInfo updateAccount(final AccountInfo info) {
+		DaoImplHelper.doTask(new IDaoHandler<BaseInfo>() {
+
+			@Override
+			public BaseInfo handleSession(Session s) {
+				s.update(info);
+				return null;
+			}
+		});
 		return info;
 	}
 
 	@Override
-	public BaseInfo getAccountInfo(Long id) {
+	public BaseInfo getAccountInfo(final Long id) {
 		if ( id == null )return GlobalValue.MESSAGES.get(
 				GlobalValue.STR_INVALID_REQUEST);
-		SessionFactory sessionFactory = HibernateSessionFactory.getSessionFactory();   
-        Session s = null;  
-        Transaction t = null;  
-        AccountInfo user = null;  
-        try{  
-	         s = sessionFactory.openSession();  
-	         t = s.beginTransaction();
-	         String hql = "FROM AccountInfo "  
-	        		 + " WHERE user_id ='" + id + "'";
-	         Query query = s.createQuery(hql);
-	         user = (AccountInfo) query.uniqueResult();   
-	         t.commit();  
-        }catch(Exception err){  
-	        t.rollback();  
-	        err.printStackTrace();  
-        }finally{  
-        	s.close();  
-        }  
-        return user;
+		return DaoImplHelper.doTask(new IDaoHandler<BaseInfo>() {
+
+			@Override
+			public BaseInfo handleSession(Session s) {
+				String hql = "FROM AccountInfo "  
+		        		 + " WHERE user_id ='" + id + "'";
+		         Query query = s.createQuery(hql);
+		         return (AccountInfo) query.uniqueResult();
+			}
+		});
 	}
 
 	@Override
@@ -147,82 +132,67 @@ public class AccountDaoImpl implements IAccountDao {
 	}
 
 	@Override
-	public BaseInfo searchAccountInfo(String queryStr) {
-		if ( !StringUtil.isValidName(queryStr) )return GlobalValue.MESSAGES.get(
-				GlobalValue.STR_INVALID_REQUEST);
-		SessionFactory sessionFactory = HibernateSessionFactory.getSessionFactory();   
-        Session s = null;  
-        Transaction t = null;  
-        AccountInfo user = null;  
-        try{  
-	         s = sessionFactory.openSession();  
-	         t = s.beginTransaction();
-	         String hql = "FROM AccountInfo "  
-	        		 + " WHERE user_display_name='" + queryStr + "'";
-	         Query query = s.createQuery(hql);
-	         user = (AccountInfo) query.uniqueResult();   
-	         t.commit();  
-        }catch(Exception err){  
-	        t.rollback();  
-	        err.printStackTrace();  
-        }finally{  
-        	s.close();  
-        }  
-        return user;
+	public List<AccountInfo> searchAccountInfo(final String queryStr,final boolean like) {
+		return DaoImplHelper.doTask(new IDaoHandler<List<AccountInfo>>() {
+			@Override
+			public List<AccountInfo> handleSession(Session s) {
+				List<AccountInfo> result = new ArrayList<AccountInfo>();
+				String hql = "";
+				if ( like ){
+					hql = "FROM AccountInfo "  
+			        		 + " WHERE user_display_name like '%"  + queryStr  + "%'";
+				} else {
+					hql = "FROM AccountInfo "  
+			        		 + " WHERE user_display_name='"  + queryStr + "'";
+				}
+		         Query query = s.createQuery(hql);
+		         if ( like ){
+		        	 result = (List<AccountInfo>)query.list();
+		         } else {
+		        	 AccountInfo a = (AccountInfo) query.uniqueResult();
+		        	 if ( a != null ){
+		        		 result.add(a); 
+		        	 }
+		         }
+		         return result;
+			}
+		});
 	}
 
 	@Override
 	public BaseInfo loginAccount(AccountInfo info) {
 		if ( !AccountInfo.isValidAccount(info) )return GlobalValue.MESSAGES.get(
 				GlobalValue.STR_ACCOUNT_INVALID);
-		String name = info.getDisplayName();
-		String pwd = info.getPassword();
+		final String name = info.getDisplayName();
+		final String pwd = info.getPassword();
 		if ( name == null || pwd == null )return GlobalValue.MESSAGES.get(
 				GlobalValue.STR_INVALID_REQUEST);
-		SessionFactory sessionFactory = HibernateSessionFactory.getSessionFactory();   
-        Session s = null;  
-        Transaction t = null;  
-        AccountInfo user = null;  
-        try{  
-	         s = sessionFactory.openSession();  
-	         t = s.beginTransaction();
-	         String hql = "FROM AccountInfo "  
-	        		 + " WHERE user_display_name='" + name + "'"
-	        		 + " AND user_password='" + pwd + "'";    
-	         Query query = s.createQuery(hql);
-	         user = (AccountInfo) query.uniqueResult();   
-	         t.commit();  
-        }catch(Exception err){  
-	        t.rollback();  
-	        err.printStackTrace();  
-        }finally{  
-        	s.close();  
-        }  
-        return user;
+		return DaoImplHelper.doTask(new IDaoHandler<BaseInfo>() {
+
+			@Override
+			public BaseInfo handleSession(Session s) {
+				String hql = "FROM AccountInfo "  
+		        		 + " WHERE user_display_name='" + name + "'"
+		        		 + " AND user_password='" + pwd + "'";    
+		         Query query = s.createQuery(hql);
+		         return (AccountInfo) query.uniqueResult();   
+			}
+		});
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<AccountInfo> getAllAccount() {
-		SessionFactory sessionFactory = HibernateSessionFactory.getSessionFactory();   
-        Session s = null;  
-        Transaction t = null;  
-        List<AccountInfo> uesrs = null;  
-        try{  
-	         s = sessionFactory.openSession();  
-	         t = s.beginTransaction();  
-	         String hql = "from AccountInfo";    
-	         Query query = s.createQuery(hql);    
-	         query.setCacheable(true); // …Ë÷√ª∫¥Ê    
-	         uesrs = query.list();    
-	         t.commit();  
-        }catch(Exception err){  
-	        t.rollback();  
-	        err.printStackTrace();
-        }finally{  
-        	s.close();  
-        }  
-        return uesrs;
+		return DaoImplHelper.doTask(new IDaoHandler<List<AccountInfo>>() {
+
+			@Override
+			public List<AccountInfo> handleSession(Session s) {
+				String hql = "from AccountInfo";    
+		         Query query = s.createQuery(hql);    
+		         query.setCacheable(true); 
+		         return (List<AccountInfo>) query.list(); 
+			}
+		});
 	}
 
 	@Override
@@ -241,15 +211,14 @@ public class AccountDaoImpl implements IAccountDao {
 						+ " AND user_status = '" + GlobalValue.USTATUS_NORMAL + "'"
 						;  
 		         Query query = s.createQuery(hql);    
-		         query.setCacheable(true); // …Ë÷√ª∫¥Ê    
+		         query.setCacheable(true); 
 		         List<AccountInfo> users = query.list();
 		         if ( ListUtil.isNotEmpty(users) ){
 		        	 IPhoneAndGroupDao ipad= new PhoneAndGroupDaoImpl();
 		        	 IContactDao icd = new ContactDaoImpl();
 		        	 for ( AccountInfo a : users ){
 		        		 PhoneAndGroupInfo pg = ipad.getPhoneAndGroupInfoByUserIdAndGroupId(a.getId(), gid);
-		        		 Type t = new TypeToken<List<Long>>(){}.getType();
-		        		 List<Long> contactIds = new Gson().fromJson(pg.getContactIds(),t);
+		        		 List<Long> contactIds = ContactInfo.stringToList(pg.getContactIds());
 		        		 List<ContactInfo> contacts = new ArrayList<ContactInfo>();
 		        		 if ( ListUtil.isNotEmpty(contactIds) ){
 		        			 for ( Long id : contactIds ){
@@ -268,6 +237,45 @@ public class AccountDaoImpl implements IAccountDao {
 		return results;
 	}
 
-
+	@Override
+	public List<AccountInfo> getFriendsOfUser(final Long uid) {
+		return DaoImplHelper.doTask(new IDaoHandler<List<AccountInfo>>() {
+			@Override
+			public List<AccountInfo> handleSession(Session s) {
+				String hql = " FROM AccountInfo a"
+						+ " WHERE a.id In "
+						+ "("
+						+ " SELECT uag.followUserId FROM UserRelationshipInfo uag"
+						+ " WHERE userId = '" + uid + "'"
+						+ " GROUP BY uag.followUserId"
+						+ " )"
+						+ " AND user_status = '" + GlobalValue.USTATUS_NORMAL + "'"
+						;  
+		         Query query = s.createQuery(hql);    
+		         query.setCacheable(true); 
+		         List<AccountInfo> users = query.list();
+		         if ( ListUtil.isNotEmpty(users) ){
+		        	 IUserRelationshipDao iurd = new UserRelationshipImpl();
+		        	 IContactDao icd = new ContactDaoImpl();
+		        	 for ( AccountInfo a : users ){
+		        		 //get the contacts which friend a expose to me(uid)
+		        		 UserRelationshipInfo pg = iurd.getUserRelationshipInfoByUserIdAndGroupId(a.getId(), uid);
+		        		 List<Long> contactIds = ContactInfo.stringToList(pg.getContactIds());
+		        		 List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+		        		 if ( ListUtil.isNotEmpty(contactIds) ){
+		        			 for ( Long id : contactIds ){
+		        				 BaseInfo tmp = icd.getContactInfo(id);
+		        				 if ( tmp instanceof ContactInfo ){
+		        					 contacts.add((ContactInfo) tmp);
+		        				 }
+		        			 }
+		        		 }
+		        		 a.setContactsList(contacts);
+		        	 }
+		         }
+				return users;
+			}
+		});
+	}
 
 }

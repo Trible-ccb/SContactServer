@@ -13,12 +13,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.hibernate.annotations.GenericGenerator;
 
 import ccb.scontact.hibernate.dao.IGroupValidateDao;
-import ccb.scontact.utils.StringUtil;
 
+/**
+ * @author modify by Trible Chen
+ *the class is for holding the message 
+ *when creating relationship between user and group 
+ *or friendship between user and user 
+ */
 @Entity
 @Table(name=IGroupValidateDao.TABLE_NAME)
 @XmlRootElement
-public class GroupValidateInfo extends BaseInfo {
+public class ValidateInfo extends BaseInfo {
 
 	private Long id;
 	private Long start_user_id;
@@ -78,15 +83,15 @@ public class GroupValidateInfo extends BaseInfo {
 		this.groupId = groupId;
 	}
 	
-	private List<GroupValidateInfo> GroupValidateInfoList;
+	private List<ValidateInfo> GroupValidateInfoList;
 
 
 	@Transient
-	public List<GroupValidateInfo> getGroupValidateInfoList() {
+	public List<ValidateInfo> getGroupValidateInfoList() {
 		return GroupValidateInfoList;
 	}
 	public void setGroupValidateInfoList(
-			List<GroupValidateInfo> groupValidateInfoList) {
+			List<ValidateInfo> groupValidateInfoList) {
 		GroupValidateInfoList = groupValidateInfoList;
 	}
 }

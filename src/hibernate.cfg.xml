@@ -32,7 +32,8 @@
 	<mapping class="ccb.scontact.pojo.ContactInfo" />
 	<mapping class="ccb.scontact.pojo.GroupInfo" />
 	<mapping class="ccb.scontact.pojo.PhoneAndGroupInfo" />
-	<mapping class="ccb.scontact.pojo.GroupValidateInfo" />
+	<mapping class="ccb.scontact.pojo.UserRelationshipInfo" />
+	<mapping class="ccb.scontact.pojo.ValidateInfo" />
 </session-factory>
 
 </hibernate-configuration>

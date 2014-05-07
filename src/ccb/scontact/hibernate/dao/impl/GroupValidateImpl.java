@@ -9,34 +9,34 @@ import org.hibernate.Session;
 import ccb.scontact.hibernate.dao.IGroupValidateDao;
 import ccb.scontact.hibernate.dao.impl.DaoImplHelper.IDaoHandler;
 import ccb.scontact.pojo.BaseInfo;
-import ccb.scontact.pojo.GroupValidateInfo;
+import ccb.scontact.pojo.ValidateInfo;
 
 public class GroupValidateImpl implements IGroupValidateDao {
 
 	@Override
-	public BaseInfo addOneValidate(final GroupValidateInfo info) {
+	public BaseInfo addOneValidate(final ValidateInfo info) {
 		BaseInfo result;
 		result = DaoImplHelper.doTask(new IDaoHandler<BaseInfo> () {
 			@Override
 			public BaseInfo handleSession(Session s) {
 				Serializable result = s.save(info);
-				if(result instanceof Long)
+				if(result instanceof Long){
 					info.setId((Long) result);
-				return info;
+					return info;
+				} else {
+					return null;
+				}
 			}
 		});
 		return result;
 	}
 
 	@Override
-	public BaseInfo deleteOneValidate(final GroupValidateInfo info) {
+	public BaseInfo deleteOneValidate(final ValidateInfo info) {
 		BaseInfo result;
 		result = DaoImplHelper.doTask(new IDaoHandler<BaseInfo> () {
 			@Override
 			public BaseInfo handleSession(Session s) {
-//				String hql = "delete FROM group_validate"
-//						+ " WHERE id = '" + info.getId()+"'";
-//				s.createQuery(hql).executeUpdate();
 				s.delete(info);
 				return info;
 			}
@@ -45,17 +45,18 @@ public class GroupValidateImpl implements IGroupValidateDao {
 	}
 
 	@Override
-	public List<GroupValidateInfo> getMyValidateList(final GroupValidateInfo info) {
-		List<GroupValidateInfo> result;
-		result = DaoImplHelper.doTask(new IDaoHandler<List<GroupValidateInfo>> () {
+	public List<ValidateInfo> getMyValidateList(final ValidateInfo info) {
+		List<ValidateInfo> result;
+		result = DaoImplHelper.doTask(new IDaoHandler<List<ValidateInfo>> () {
 			@Override
-			public List<GroupValidateInfo> handleSession(Session s) {
+			public List<ValidateInfo> handleSession(Session s) {
 				
-				String hql = "FROM GroupValidateInfo"
-						+ " WHERE end_user_id = '" + info.getEnd_user_id()+"'";
+				String hql = "FROM ValidateInfo"
+						+ " WHERE end_user_id = '" + info.getEnd_user_id()+"'"
+						+ " GROUP BY id";
 				Query query = s.createQuery(hql);
 				query.setCacheable(true); // ���û���    
-		         List<GroupValidateInfo> MyValidateList = query.list();
+		         List<ValidateInfo> MyValidateList = query.list();
 		         
 		         return MyValidateList;
 			}
