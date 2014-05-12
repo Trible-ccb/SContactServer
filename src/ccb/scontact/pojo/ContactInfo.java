@@ -30,13 +30,13 @@ public class ContactInfo extends BaseInfo implements Serializable{
 	private String contact;
 	private Integer status;
 	private Long lastestUsedTime;
-	private Integer type;
+	private String type;
 	
 	@Column(name = "type")
-	public Integer getType() {
+	public String getType() {
 		return type;
 	}
-	public void setType(Integer type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 	@GenericGenerator(name = "generator", strategy = "increment")

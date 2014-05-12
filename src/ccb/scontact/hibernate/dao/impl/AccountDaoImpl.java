@@ -16,6 +16,7 @@ import com.google.gson.reflect.TypeToken;
 import ccb.scontact.hibernate.HibernateSessionFactory;
 import ccb.scontact.hibernate.dao.IAccountDao;
 import ccb.scontact.hibernate.dao.IContactDao;
+import ccb.scontact.hibernate.dao.IGroupDao;
 import ccb.scontact.hibernate.dao.IPhoneAndGroupDao;
 import ccb.scontact.hibernate.dao.IUserRelationshipDao;
 import ccb.scontact.hibernate.dao.impl.DaoImplHelper.IDaoHandler;
@@ -23,6 +24,7 @@ import ccb.scontact.pojo.AccountInfo;
 import ccb.scontact.pojo.BaseInfo;
 import ccb.scontact.pojo.ContactInfo;
 import ccb.scontact.pojo.ErrorInfo;
+import ccb.scontact.pojo.GroupInfo;
 import ccb.scontact.pojo.PhoneAndGroupInfo;
 import ccb.scontact.pojo.UserRelationshipInfo;
 import ccb.scontact.utils.GlobalValue;
@@ -70,19 +72,17 @@ public class AccountDaoImpl implements IAccountDao {
 		//if the field phone number has value, then store in ContactInfo table
 		if ( result instanceof AccountInfo ){
 			final AccountInfo tmp = (AccountInfo) result;
-			DaoImplHelper.doTask(new IDaoHandler<BaseInfo>() {
-
-				@Override
-				public BaseInfo handleSession(Session s) {
-					IContactDao icd = new ContactDaoImpl();
-					ContactInfo contact = new ContactInfo();
-					contact.setContact(tmp.getPhoneNumber());
-					contact.setUserId(tmp.getId());
-					contact.setStatus(GlobalValue.CSTATUS_USED);
-					icd.addContact(contact);
-					return null;//no need to return
-				}
-			});
+			IContactDao icd = new ContactDaoImpl();
+			ContactInfo contact = new ContactInfo();
+			contact.setContact(tmp.getPhoneNumber());
+			contact.setUserId(tmp.getId());
+			contact.setStatus(GlobalValue.CSTATUS_USED);
+			if ( StringUtil.isValidPhoneNumber(tmp.getPhoneNumber())){
+				contact.setType(GlobalValue.CTYPE_PHONE);
+			} else if ( StringUtil.isValidEmail(tmp.getPhoneNumber())){
+				contact.setType(GlobalValue.CTYPE_EMAIL);
+			}
+			icd.addContact(contact);
 		}
 		return result;
 	}
@@ -276,6 +276,30 @@ public class AccountDaoImpl implements IAccountDao {
 				return users;
 			}
 		});
+	}
+
+	@Override
+	public List<AccountInfo> getFriendsOfUserContactId(Long cid) {
+		IContactDao icd = new ContactDaoImpl();
+		final BaseInfo contact = icd.getContactInfo(cid);
+		List<AccountInfo> results = new ArrayList<AccountInfo>();
+		if ( contact instanceof ContactInfo ){
+			IUserRelationshipDao iurd = new UserRelationshipImpl();
+			final ContactInfo tmp = (ContactInfo) contact;
+			List<AccountInfo> uFriends = getFriendsOfUser(tmp.getUserId());//get user friend
+			if ( ListUtil.isNotEmpty(uFriends) ){
+				for ( AccountInfo info : uFriends ){//check each friend
+					UserRelationshipInfo uri = iurd.getUserRelationshipInfoByUserIdAndGroupId(
+							tmp.getUserId(), info.getId()
+							);
+					List<Long> cids = ContactInfo.stringToList(uri.getContactIds());
+					if ( ListUtil.isNotEmpty(cids) && cids.contains(cid) ){
+						results.add(info);
+					}
+				}
+			}
+		}
+		return results;
 	}
 
 }

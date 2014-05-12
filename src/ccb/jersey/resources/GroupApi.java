@@ -12,6 +12,7 @@ import ccb.scontact.hibernate.dao.IGroupDao;
 import ccb.scontact.hibernate.dao.impl.GroupDaoImpl;
 import ccb.scontact.pojo.AccountInfo;
 import ccb.scontact.pojo.BaseInfo;
+import ccb.scontact.pojo.ContactInfo;
 import ccb.scontact.pojo.ErrorInfo;
 import ccb.scontact.pojo.GroupInfo;
 import ccb.scontact.pojo.PhoneAndGroupInfo;
@@ -224,4 +225,33 @@ public class GroupApi {
 		}
 	}
 	
+	/**
+	 * @param json ContactInfo
+	 * @return get the groups which have the contact
+	 */
+	@POST
+	@Path("/get_contact_groups")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Object getGroupsContainContact(
+			@QueryParam("json") String json) {
+ 		List<GroupInfo>  result = null;
+ 		IGroupDao icd = new GroupDaoImpl();
+ 		ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_GROUP_ERROR);
+ 		try {
+ 			ContactInfo info ;
+ 			info = new Gson().fromJson(json, ContactInfo.class);
+ 			if ( info != null ){
+ 				result = icd.getGroupOfUserContact(info.getId());
+ 			}
+			if ( result == null ){
+				return msg;
+			} else {
+				return result;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			msg.setMessgae(e.getMessage());
+			return msg;
+		}
+	}
 }

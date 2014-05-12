@@ -86,9 +86,17 @@ public class ContactDaoImpl implements IContactDao {
 	public BaseInfo deleteContactInfo(Long id) {
 		BaseInfo tmp = getContactInfo(id);
 		if ( tmp  instanceof ContactInfo ){
-			ContactInfo c = (ContactInfo) tmp;
+			final ContactInfo c = (ContactInfo) tmp;
 			c.setStatus(GlobalValue.CSTATUS_DELETED);
-			tmp = updateContact(c);
+			DaoImplHelper.doTask(new IDaoHandler<BaseInfo>() {
+
+				@Override
+				public BaseInfo handleSession(Session s) {
+					s.delete(c);
+					return null;
+				}
+			});
+			return c;
 		}
 		return tmp;
 	}
@@ -118,7 +126,7 @@ public class ContactDaoImpl implements IContactDao {
 			public List<ContactInfo> handleSession(Session s) {
 				String hql = "FROM ContactInfo";    
 		         Query query = s.createQuery(hql);    
-		         query.setCacheable(true); // ÉèÖÃ»º´æ    
+		         query.setCacheable(true); // ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½    
 		         List<ContactInfo> uesrs = query.list();
 				return uesrs;
 			}
@@ -137,7 +145,7 @@ public class ContactDaoImpl implements IContactDao {
 						+ " WHERE user_id = '" + uid + "'"
 						+ " AND status <> '" + GlobalValue.CSTATUS_DELETED + "'";    
 		         Query query = s.createQuery(hql);    
-		         query.setCacheable(true); // ÉèÖÃ»º´æ    
+		         query.setCacheable(true);  
 		         List<ContactInfo> uesrs = query.list();
 				return uesrs;
 			}

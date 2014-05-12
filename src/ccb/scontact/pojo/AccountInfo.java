@@ -24,8 +24,9 @@ public class AccountInfo extends BaseInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private Integer status,gender;
 	Long birthday,createTime,id;
-	private String displayName,phoneNumber , email,realName,description,type,password,cookie;
-	
+	private String displayName,phoneNumber ,photoUrl,
+	email,realName,description,type,password,cookie;
+
 	private List<ContactInfo> contactsList;
 	
 	@GenericGenerator(name = "generator", strategy = "increment")
@@ -144,6 +145,14 @@ public class AccountInfo extends BaseInfo implements Serializable{
 	public void setCookie(String cookie) {
 		this.cookie = cookie;
 	}
+	@Column(name="user_photo_url")
+	public String getPhotoUrl() {
+		return photoUrl;
+	}
+	public void setPhotoUrl(String photoUrl) {
+		this.photoUrl = photoUrl;
+	}
+	
 	@Transient
 	public List<ContactInfo> getContactsList() {
 		return contactsList;

@@ -1,19 +1,24 @@
 package ccb.scontact.hibernate.dao.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
 
 import ccb.scontact.hibernate.dao.IAccountDao;
+import ccb.scontact.hibernate.dao.IContactDao;
 import ccb.scontact.hibernate.dao.IGroupDao;
+import ccb.scontact.hibernate.dao.IPhoneAndGroupDao;
 import ccb.scontact.hibernate.dao.impl.DaoImplHelper.IDaoHandler;
 import ccb.scontact.pojo.AccountInfo;
 import ccb.scontact.pojo.BaseInfo;
+import ccb.scontact.pojo.ContactInfo;
 import ccb.scontact.pojo.GroupInfo;
 import ccb.scontact.pojo.PhoneAndGroupInfo;
 import ccb.scontact.utils.GlobalValue;
+import ccb.scontact.utils.ListUtil;
 import ccb.scontact.utils.StringUtil;
 
 public class GroupDaoImpl implements IGroupDao {
@@ -109,9 +114,16 @@ public class GroupDaoImpl implements IGroupDao {
 	public BaseInfo deleteGroupInfo(Long id) {
 		BaseInfo tmp = getGroupInfo(id);
 		if ( tmp  instanceof GroupInfo ){
-			GroupInfo c = (GroupInfo) tmp;
+			final GroupInfo c = (GroupInfo) tmp;
 			c.setStatus(GlobalValue.GSTATUS_DELETED);
-			tmp = updateGroup(c);
+			DaoImplHelper.doTask(new IDaoHandler<BaseInfo>() {
+				@Override
+				public BaseInfo handleSession(Session s) {
+					s.delete(c);
+					return c;
+				}
+			});
+			return c;
 		}
 		return tmp;
 	}
@@ -172,6 +184,29 @@ public class GroupDaoImpl implements IGroupDao {
 				return result;
 			}
 		});
+		return results;
+	}
+
+	@Override
+	public List<GroupInfo> getGroupOfUserContact(Long cid) {
+		IContactDao icd = new ContactDaoImpl();
+		final BaseInfo contact = icd.getContactInfo(cid);
+		List<GroupInfo> results = new ArrayList<GroupInfo>();
+		if ( contact instanceof ContactInfo ){
+			IPhoneAndGroupDao ipad = new PhoneAndGroupDaoImpl();
+			final ContactInfo tmp = (ContactInfo) contact;
+			List<GroupInfo> uGroups = getUserGroup(tmp.getUserId());//get user groups
+			if ( ListUtil.isNotEmpty(uGroups) ){
+				for ( GroupInfo info : uGroups ){//check each group
+					PhoneAndGroupInfo pagi = ipad.getPhoneAndGroupInfoByUserIdAndGroupId(
+							tmp.getUserId(), info.getId());
+					List<Long> cids = ContactInfo.stringToList(pagi.getContactIds());
+					if ( ListUtil.isNotEmpty(cids) && cids.contains(cid) ){
+						results.add(info);
+					}
+				}
+			}
+		}
 		return results;
 	}
 	

@@ -18,4 +18,9 @@ public interface IAccountDao {
 	List<AccountInfo> getAllAccount();
 	List<AccountInfo> getAccountsOfGroup(Long gid);
 	List<AccountInfo> getFriendsOfUser(Long uid);
+	/**
+	 * @param cid 
+	 * @return the friends who can see the contact
+	 */
+	List<AccountInfo> getFriendsOfUserContactId(Long cid);
 }

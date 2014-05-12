@@ -16,5 +16,10 @@ public interface IGroupDao {
 	BaseInfo deleteGroupInfo(Long id);
 	List<GroupInfo> searchGroupInfo(String query);
 	List<GroupInfo> getAllGroup();
-	List<GroupInfo> getUserGroup(Long id);
+	List<GroupInfo> getUserGroup(Long uid);
+	/**
+	 * @param cid
+	 * @return the groups which have the contact
+	 */
+	List<GroupInfo> getGroupOfUserContact(Long cid);
 }

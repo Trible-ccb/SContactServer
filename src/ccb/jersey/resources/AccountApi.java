@@ -1,16 +1,22 @@
 package ccb.jersey.resources;
 
+import java.util.List;
+
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import ccb.scontact.hibernate.dao.IAccountDao;
+import ccb.scontact.hibernate.dao.IGroupDao;
 import ccb.scontact.hibernate.dao.IUserRelationshipDao;
 import ccb.scontact.hibernate.dao.impl.AccountDaoImpl;
+import ccb.scontact.hibernate.dao.impl.GroupDaoImpl;
 import ccb.scontact.hibernate.dao.impl.UserRelationshipImpl;
 import ccb.scontact.pojo.AccountInfo;
 import ccb.scontact.pojo.BaseInfo;
+import ccb.scontact.pojo.ContactInfo;
 import ccb.scontact.pojo.ErrorInfo;
 import ccb.scontact.pojo.GroupInfo;
 import ccb.scontact.pojo.UserRelationshipInfo;
@@ -227,6 +233,36 @@ public class AccountApi {
 				return adi.searchAccountInfo(query, true);
 			} else {
 				return msg;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			msg.setMessgae(e.getMessage());
+			return msg;
+		}
+	}
+	
+	/**
+	 * @param json ContactInfo
+	 * @return get the friends which have the contact
+	 */
+	@POST
+	@Path("/get_contact_friends")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Object getFriendsContainContact(
+			@QueryParam("json") String json) {
+ 		List<AccountInfo>  result = null;
+ 		IAccountDao iad = new AccountDaoImpl();
+ 		ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_GROUP_ERROR);
+ 		try {
+ 			ContactInfo info ;
+ 			info = new Gson().fromJson(json, ContactInfo.class);
+ 			if ( info != null ){
+ 				result = iad.getFriendsOfUserContactId(info.getId());
+ 			}
+			if ( result == null ){
+				return msg;
+			} else {
+				return result;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

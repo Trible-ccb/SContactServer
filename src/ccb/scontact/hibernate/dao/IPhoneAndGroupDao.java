@@ -13,6 +13,7 @@ public interface IPhoneAndGroupDao {
 	BaseInfo exitGroup(PhoneAndGroupInfo info);
 	BaseInfo checkPhoneAndGroupInfo(PhoneAndGroupInfo info);
 	List<PhoneAndGroupInfo> getPhoneAndGroupInfoByGroupId(Long gid);
+	List<PhoneAndGroupInfo> getPhoneAndGroupInfoByUserId(Long uid);
 	PhoneAndGroupInfo getPhoneAndGroupInfoByUserIdAndGroupId(Long uid,Long gid);
 	
 }

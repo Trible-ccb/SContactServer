@@ -83,6 +83,29 @@ public class ValidateApi {
 		return msg;
 	}
 
+	@POST
+	@Path("/removeRelationship")
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseInfo removeRelationship(@QueryParam("json") String json)
+	{
+		ValidateInfo info;
+		BaseInfo result = null;
+		ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_VALIDATE_ERROR);
+		try {
+			info = new Gson().fromJson(json, ValidateInfo.class);
+			IRelationshipDao igvd = new RelationshipImpl();
+			if ( info instanceof ValidateInfo ){
+				result = igvd.removeRelationship(info);
+				if ( result != null ){
+					return result;
+				}
+			}
+		} catch (Exception e) {
+			msg.setMessgae(e.getMessage());
+			return msg;
+		}
+		return msg;
+	}
 	/**
 	 * @param json {end_user_id}
 	 * @return
@@ -110,7 +133,7 @@ public class ValidateApi {
 			return msg;
 		}
 		return msg;
-	}
+	} 
 
 
 	/**
