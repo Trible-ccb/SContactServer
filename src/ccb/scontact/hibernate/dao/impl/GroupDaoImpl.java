@@ -37,7 +37,7 @@ public class GroupDaoImpl implements IGroupDao {
 				if ( user instanceof AccountInfo ){
 					//check the limited of create group nums; 
 					AccountInfo tmp = (AccountInfo) user;
-					List<GroupInfo> owners = getUserGroup(tmp.getId());
+					List<GroupInfo> owners = getUserOwnerGroup(tmp.getId());
 					int cn =  owners == null ? 0 : owners.size();
 					int mn = GlobalValue.CREATE_GROUP_NUMBERS_RULE.get(tmp.getType());
 					if ( mn > cn ){//still can create group
@@ -102,9 +102,16 @@ public class GroupDaoImpl implements IGroupDao {
 			@Override
 			public BaseInfo handleSession(Session s) {
 				String hql = "FROM GroupInfo "  
-		        		 + " WHERE id ='" + id + "'";
-		         Query query = s.createQuery(hql);
-		         return (BaseInfo) query.uniqueResult();  
+		        		 + " WHERE id =:id";
+		         Query query = s.createQuery(hql).setParameter("id", id);
+		         GroupInfo re = (GroupInfo) query.uniqueResult();  
+		         if ( re != null ){
+		        	 IAccountDao iad = new AccountDaoImpl();
+		        	 List<AccountInfo> accs = iad.getAccountsOfGroup(re.getId());
+		        	 int members = accs == null ? 0 : accs.size();
+		        	 re.setGroupMembers(members);
+		         }
+		         return re;
 			}
 		});
 		return result;
@@ -119,6 +126,13 @@ public class GroupDaoImpl implements IGroupDao {
 			DaoImplHelper.doTask(new IDaoHandler<BaseInfo>() {
 				@Override
 				public BaseInfo handleSession(Session s) {
+					IPhoneAndGroupDao ipad = new PhoneAndGroupDaoImpl();
+					List<PhoneAndGroupInfo> gs = ipad.getPhoneAndGroupInfoByGroupId(c.getId());
+					if ( gs != null ){
+						for ( PhoneAndGroupInfo ia : gs ){
+							s.delete(ia);
+						}
+					}
 					s.delete(c);
 					return c;
 				}
@@ -129,17 +143,16 @@ public class GroupDaoImpl implements IGroupDao {
 	}
 
 	@Override
-	public List<GroupInfo> searchGroupInfo(final String query) {
-		if ( !StringUtil.isValidName(query) )return null;
+	public List<GroupInfo> searchGroupInfo(final String queryStr) {
 		List<GroupInfo> result = null;
 		result = DaoImplHelper.doTask(new IDaoHandler<List<GroupInfo>>() {
 			@Override
 			public List<GroupInfo> handleSession(Session s) {
-				String hql = "FROM GroupInfo "  
-		        		 + " WHERE group_display_name like '%" + query + "%'"
+				String hql = " FROM GroupInfo "  
+		        		 + " WHERE group_display_name like :name"
 		        		 + " AND group_status = '" + GlobalValue.GSTATUS_USED + "'"
 		        		 ;
-		         Query query = s.createQuery(hql);
+		         Query query = s.createQuery(hql).setParameter("name", queryStr+"%");
 		         return query.list();  
 			}
 		});
@@ -155,7 +168,7 @@ public class GroupDaoImpl implements IGroupDao {
 			public List<GroupInfo> handleSession(Session s) {
 				String hql = "FROM GroupInfo";    
 				Query query = s.createQuery(hql);    
-				query.setCacheable(true); // ���û���    
+				query.setCacheable(true);  
 				return  query.list();
 			}
 		});
@@ -173,12 +186,12 @@ public class GroupDaoImpl implements IGroupDao {
 						+ " WHERE g.id In "
 						+ "("
 						+ " SELECT pag.groupId FROM PhoneAndGroupInfo pag"
-						+ " WHERE user_id = '" + id + "'"
+						+ " WHERE user_id =:uid"
 						+ " GROUP BY pag.groupId"
 						+ " )"
 						+ " AND group_status <> '" + GlobalValue.GSTATUS_DELETED + "'"
 						;
-		         Query query = s.createQuery(hql);    
+		         Query query = s.createQuery(hql).setParameter("uid", id);    
 		         query.setCacheable(true);
 		         List<GroupInfo> result = query.list();
 				return result;
@@ -208,6 +221,24 @@ public class GroupDaoImpl implements IGroupDao {
 			}
 		}
 		return results;
+	}
+
+	@Override
+	public List<GroupInfo> getUserOwnerGroup(final Long uid) {
+		return DaoImplHelper.doTask(new IDaoHandler<List<GroupInfo>>() {
+
+			@Override
+			public List<GroupInfo> handleSession(Session s) {
+				String hql = " FROM GroupInfo g"
+						+ " WHERE g.ownerId =:uid"
+						+ " AND group_status <> '" + GlobalValue.GSTATUS_DELETED + "'"
+						;
+		         Query query = s.createQuery(hql).setParameter("uid", uid);    
+		         query.setCacheable(true);
+		         List<GroupInfo> result = query.list();
+				return result;
+			}
+		});
 	}
 	
 }

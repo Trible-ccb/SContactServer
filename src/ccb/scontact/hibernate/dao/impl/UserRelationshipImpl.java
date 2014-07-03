@@ -94,9 +94,12 @@ public class UserRelationshipImpl implements IUserRelationshipDao{
 			@Override
 			public BaseInfo handleSession(Session s) {
 				String hql = " FROM UserRelationshipInfo"
-						+ " WHERE follow_user_id = '" + info.getFollowUserId() + "'"
-						+ " AND user_id = '" + info.getUserId() + "'";
-				return (BaseInfo) s.createQuery(hql).uniqueResult();
+						+ " WHERE follow_user_id =:fid"
+						+ " AND user_id =:uid";
+				return (BaseInfo) s.createQuery(hql)
+						.setParameter("fid", info.getFollowUserId())
+						.setParameter("uid", info.getUserId())
+						.uniqueResult();
 			}
 		});
 		return result;
@@ -110,8 +113,8 @@ public class UserRelationshipImpl implements IUserRelationshipDao{
 			@Override
 			public List<UserRelationshipInfo> handleSession(Session s) {
 				String hql = " FROM UserRelationshipInfo"
-						+ " WHERE user_id = '" + uid + "'";
-		         Query query = s.createQuery(hql);    
+						+ " WHERE user_id=:uid";
+		         Query query = s.createQuery(hql).setParameter("uid", uid);    
 		         query.setCacheable(true); 
 		         List<UserRelationshipInfo> uesrs = query.list();
 				return uesrs;
@@ -129,9 +132,11 @@ public class UserRelationshipImpl implements IUserRelationshipDao{
 			@Override
 			public UserRelationshipInfo handleSession(Session s) {
 				String hql = " FROM UserRelationshipInfo"
-						+ " WHERE user_id = '" + uid + "'"
-						+ " AND follow_user_id = '" + fid + "'";
-		         Query query = s.createQuery(hql);    
+						+ " WHERE user_id =:uid"
+						+ " AND follow_user_id =:fid";
+		         Query query = s.createQuery(hql)
+						        		 .setParameter("fid", fid)
+										.setParameter("uid", uid);    
 		         query.setCacheable(true); 
 		         UserRelationshipInfo uesrs = (UserRelationshipInfo) query.uniqueResult();
 				return uesrs;

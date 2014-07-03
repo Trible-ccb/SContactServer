@@ -1,41 +1,34 @@
 package ccb.scontact.hibernate.dao.impl;
 
 import java.io.Serializable;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import ccb.scontact.hibernate.HibernateSessionFactory;
+import ccb.scontact.hibernate.QueryParamsHelper;
 import ccb.scontact.hibernate.dao.IAccountDao;
 import ccb.scontact.hibernate.dao.IContactDao;
-import ccb.scontact.hibernate.dao.IGroupDao;
 import ccb.scontact.hibernate.dao.IPhoneAndGroupDao;
 import ccb.scontact.hibernate.dao.IUserRelationshipDao;
 import ccb.scontact.hibernate.dao.impl.DaoImplHelper.IDaoHandler;
 import ccb.scontact.pojo.AccountInfo;
 import ccb.scontact.pojo.BaseInfo;
 import ccb.scontact.pojo.ContactInfo;
-import ccb.scontact.pojo.ErrorInfo;
-import ccb.scontact.pojo.GroupInfo;
 import ccb.scontact.pojo.PhoneAndGroupInfo;
 import ccb.scontact.pojo.UserRelationshipInfo;
 import ccb.scontact.utils.GlobalValue;
 import ccb.scontact.utils.ListUtil;
+import ccb.scontact.utils.SecurityMethod;
 import ccb.scontact.utils.StringUtil;
 
 public class AccountDaoImpl implements IAccountDao {
 
 	
 	@Override
-	public BaseInfo createAccount(final AccountInfo info) {
+	public BaseInfo createAccount(final AccountInfo info,final boolean updateIfNeed) {
 		if (  !AccountInfo.isValidAccount(info) )return GlobalValue.MESSAGES.get(
 				GlobalValue.STR_ACCOUNT_INVALID);
 		BaseInfo result;
@@ -43,9 +36,25 @@ public class AccountDaoImpl implements IAccountDao {
 			@Override
 			public BaseInfo handleSession(Session s) {
 				//check whether the info exists or not;
-				List<AccountInfo> existnames = searchAccountInfo(info.getDisplayName(),false);
+				String cookieStr = null ;
+				List<AccountInfo> existnames = searchAccountInfo(info,false);
 				if ( ListUtil.isNotEmpty(existnames) ){
-					return GlobalValue.MESSAGES.get(GlobalValue.STR_NAME_UNAVAILABAL);
+					if ( updateIfNeed ){
+						AccountInfo one = existnames.get(0);
+						one.setDisplayName(info.getDisplayName());
+						one.setPhotoUrl(info.getPhotoUrl());
+						one.setGender(info.getGender());
+						one.setDescription(info.getDescription());
+						one.setThirdPartyId(info.getThirdPartyId());
+						one.setRealName(info.getRealName());
+						cookieStr = DigestUtils.shaHex(
+								one.getDisplayName()+System.currentTimeMillis());
+						one.setCookie(cookieStr);
+						updateAccount(one);
+						return one;
+					} else {
+						return GlobalValue.MESSAGES.get(GlobalValue.STR_NAME_UNAVAILABAL);
+					}
 				}  else {//add a new user
 					info.setId(null);//auto add;
 					info.setCreateTime(System.currentTimeMillis());
@@ -58,6 +67,9 @@ public class AccountDaoImpl implements IAccountDao {
 					if ( info.getType() == null ){
 						info.setType(GlobalValue.UTYPE_NORMAL);
 					}
+					cookieStr = DigestUtils.shaHex(info.getDisplayName()
+							+System.currentTimeMillis());
+					info.setCookie(cookieStr);
 					Serializable result = s.save(info);
 					if ( result instanceof Long ){
 						info.setId((Long) result);
@@ -74,12 +86,17 @@ public class AccountDaoImpl implements IAccountDao {
 			final AccountInfo tmp = (AccountInfo) result;
 			IContactDao icd = new ContactDaoImpl();
 			ContactInfo contact = new ContactInfo();
+			if ( StringUtil.isEmpty(tmp.getPhoneNumber()) )return result;
+			String decphone = SecurityMethod.getAESInstance().Decryptor(tmp.getPhoneNumber());
+			if ( decphone == null )return result;
 			contact.setContact(tmp.getPhoneNumber());
 			contact.setUserId(tmp.getId());
 			contact.setStatus(GlobalValue.CSTATUS_USED);
-			if ( StringUtil.isValidPhoneNumber(tmp.getPhoneNumber())){
+			contact.setType(GlobalValue.CTYPE_PHONE);
+			contact.setLastestUsedTime(System.currentTimeMillis());
+			if ( StringUtil.isValidPhoneNumber(decphone)){
 				contact.setType(GlobalValue.CTYPE_PHONE);
-			} else if ( StringUtil.isValidEmail(tmp.getPhoneNumber())){
+			} else if ( StringUtil.isValidEmail(decphone)){
 				contact.setType(GlobalValue.CTYPE_EMAIL);
 			}
 			icd.addContact(contact);
@@ -109,8 +126,8 @@ public class AccountDaoImpl implements IAccountDao {
 			@Override
 			public BaseInfo handleSession(Session s) {
 				String hql = "FROM AccountInfo "  
-		        		 + " WHERE user_id ='" + id + "'";
-		         Query query = s.createQuery(hql);
+		        		 + " WHERE user_id =:id";
+		         Query query = s.createQuery(hql).setParameter("id", id);
 		         return (AccountInfo) query.uniqueResult();
 			}
 		});
@@ -132,20 +149,47 @@ public class AccountDaoImpl implements IAccountDao {
 	}
 
 	@Override
-	public List<AccountInfo> searchAccountInfo(final String queryStr,final boolean like) {
+	public List<AccountInfo> searchAccountInfo(final AccountInfo queryinfo,final boolean like) {
+		
 		return DaoImplHelper.doTask(new IDaoHandler<List<AccountInfo>>() {
 			@Override
 			public List<AccountInfo> handleSession(Session s) {
 				List<AccountInfo> result = new ArrayList<AccountInfo>();
 				String hql = "";
-				if ( like ){
-					hql = "FROM AccountInfo "  
-			        		 + " WHERE user_display_name like '%"  + queryStr  + "%'";
+				String queryStr;
+				if ( !StringUtil.isEmpty(queryinfo.getThirdPartyId()) ){
+					queryStr = queryinfo.getThirdPartyId();
 				} else {
-					hql = "FROM AccountInfo "  
-			        		 + " WHERE user_display_name='"  + queryStr + "'";
+					queryStr = queryinfo.getDisplayName();
 				}
-		         Query query = s.createQuery(hql);
+				QueryParamsHelper qph = new QueryParamsHelper();
+				String realnameq = null;
+				if ( queryinfo.getRealName() != null ){
+					realnameq = " user_real_name=:user_real_name OR ";
+				}
+				hql = " FROM AccountInfo "  
+		        		 + " WHERE ";
+				if ( realnameq != null ){
+					hql += realnameq;
+				}
+				String querysId = queryinfo.getThirdPartyId();
+				if ( !StringUtil.isEmpty(querysId) ){
+					qph.add("=","user_third_usid" , querysId);
+				} else {
+					if ( like ){
+//						hql = hql.replace("#", "like");
+						queryStr = queryStr + "%";
+						qph.add("like","user_display_name" , queryStr);
+					} else {
+//						hql = hql.replace("#", "=");
+						qph.add("=","user_display_name" , queryStr);
+					}
+				}
+//				Query query = s.createQuery(hql).setParameter("name", q);
+				Query query = qph.buildQuery(s, hql);
+				if ( hql.contains(":user_real_name") ){
+					query.setParameter("user_real_name", queryinfo.getRealName());
+				}
 		         if ( like ){
 		        	 result = (List<AccountInfo>)query.list();
 		         } else {
@@ -160,22 +204,29 @@ public class AccountDaoImpl implements IAccountDao {
 	}
 
 	@Override
-	public BaseInfo loginAccount(AccountInfo info) {
+	public BaseInfo loginAccount(final AccountInfo info) {
 		if ( !AccountInfo.isValidAccount(info) )return GlobalValue.MESSAGES.get(
 				GlobalValue.STR_ACCOUNT_INVALID);
 		final String name = info.getDisplayName();
 		final String pwd = info.getPassword();
-		if ( name == null || pwd == null )return GlobalValue.MESSAGES.get(
+		if ( StringUtil.isEmpty(name) || StringUtil.isEmpty(pwd) )return GlobalValue.MESSAGES.get(
 				GlobalValue.STR_INVALID_REQUEST);
 		return DaoImplHelper.doTask(new IDaoHandler<BaseInfo>() {
 
 			@Override
 			public BaseInfo handleSession(Session s) {
 				String hql = "FROM AccountInfo "  
-		        		 + " WHERE user_display_name='" + name + "'"
-		        		 + " AND user_password='" + pwd + "'";    
-		         Query query = s.createQuery(hql);
-		         return (AccountInfo) query.uniqueResult();   
+		        		 + " WHERE user_display_name=:name"
+		        		 + " AND user_password=:psw";    
+		         Query query = s.createQuery(hql)
+		        		 .setParameter("name", name)
+		        		 .setParameter("psw", pwd);
+		         AccountInfo result = (AccountInfo) query.uniqueResult();
+		         if (!StringUtil.isEmpty(info.getNotifyId()) && result != null){
+		        	 result.setNotifyId(info.getNotifyId());
+		        	 updateAccount(result);
+		         }
+		         return result;
 			}
 		});
 	}
@@ -205,12 +256,12 @@ public class AccountDaoImpl implements IAccountDao {
 						+ " WHERE a.id In "
 						+ "("
 						+ " SELECT pag.userId FROM PhoneAndGroupInfo pag"
-						+ " WHERE group_id = '" + gid + "'"
+						+ " WHERE group_id =:gid"
 						+ " GROUP BY pag.userId"
 						+ " )"
 						+ " AND user_status = '" + GlobalValue.USTATUS_NORMAL + "'"
 						;  
-		         Query query = s.createQuery(hql);    
+		         Query query = s.createQuery(hql).setParameter("gid", gid);    
 		         query.setCacheable(true); 
 		         List<AccountInfo> users = query.list();
 		         if ( ListUtil.isNotEmpty(users) ){
@@ -218,17 +269,7 @@ public class AccountDaoImpl implements IAccountDao {
 		        	 IContactDao icd = new ContactDaoImpl();
 		        	 for ( AccountInfo a : users ){
 		        		 PhoneAndGroupInfo pg = ipad.getPhoneAndGroupInfoByUserIdAndGroupId(a.getId(), gid);
-		        		 List<Long> contactIds = ContactInfo.stringToList(pg.getContactIds());
-		        		 List<ContactInfo> contacts = new ArrayList<ContactInfo>();
-		        		 if ( ListUtil.isNotEmpty(contactIds) ){
-		        			 for ( Long id : contactIds ){
-		        				 BaseInfo tmp = icd.getContactInfo(id);
-		        				 if ( tmp instanceof ContactInfo ){
-		        					 contacts.add((ContactInfo) tmp);
-		        				 }
-		        			 }
-		        		 }
-		        		 a.setContactsList(contacts);
+		        		 a.setContactsList(icd.getContactInfosByContactString(pg.getContactIds()));
 		        	 }
 		         }
 				return users;
@@ -246,12 +287,12 @@ public class AccountDaoImpl implements IAccountDao {
 						+ " WHERE a.id In "
 						+ "("
 						+ " SELECT uag.followUserId FROM UserRelationshipInfo uag"
-						+ " WHERE userId = '" + uid + "'"
+						+ " WHERE userId =:uid"
 						+ " GROUP BY uag.followUserId"
 						+ " )"
 						+ " AND user_status = '" + GlobalValue.USTATUS_NORMAL + "'"
 						;  
-		         Query query = s.createQuery(hql);    
+		         Query query = s.createQuery(hql).setParameter("uid", uid);    
 		         query.setCacheable(true); 
 		         List<AccountInfo> users = query.list();
 		         if ( ListUtil.isNotEmpty(users) ){
@@ -260,17 +301,7 @@ public class AccountDaoImpl implements IAccountDao {
 		        	 for ( AccountInfo a : users ){
 		        		 //get the contacts which friend a expose to me(uid)
 		        		 UserRelationshipInfo pg = iurd.getUserRelationshipInfoByUserIdAndGroupId(a.getId(), uid);
-		        		 List<Long> contactIds = ContactInfo.stringToList(pg.getContactIds());
-		        		 List<ContactInfo> contacts = new ArrayList<ContactInfo>();
-		        		 if ( ListUtil.isNotEmpty(contactIds) ){
-		        			 for ( Long id : contactIds ){
-		        				 BaseInfo tmp = icd.getContactInfo(id);
-		        				 if ( tmp instanceof ContactInfo ){
-		        					 contacts.add((ContactInfo) tmp);
-		        				 }
-		        			 }
-		        		 }
-		        		 a.setContactsList(contacts);
+		        		 a.setContactsList(icd.getContactInfosByContactString(pg.getContactIds()));
 		        	 }
 		         }
 				return users;
@@ -300,6 +331,12 @@ public class AccountDaoImpl implements IAccountDao {
 			}
 		}
 		return results;
+	}
+
+	@Override
+	public BaseInfo loginWithThirdpartyAccount(AccountInfo info) {
+		BaseInfo result = createAccount(info,true);
+		return result;
 	}
 
 }

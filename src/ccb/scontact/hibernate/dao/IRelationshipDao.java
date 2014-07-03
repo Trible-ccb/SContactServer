@@ -12,6 +12,7 @@ public interface IRelationshipDao {
 	 * @return
 	 */
 	BaseInfo addRelationship(ValidateInfo info);
+	BaseInfo updateRelationship(ValidateInfo info);
 	BaseInfo removeRelationship(ValidateInfo info);
 	/**
 	 * @param info 
@@ -21,6 +22,6 @@ public interface IRelationshipDao {
 	 * end_user_id is next owner
 	 * @return
 	 */
-	BaseInfo changeRelationship(ValidateInfo info);
+//	BaseInfo changeRelationship(ValidateInfo info);
 	
 }

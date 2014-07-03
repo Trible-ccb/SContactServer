@@ -2,10 +2,13 @@ package ccb.jersey.resources;
 
 import java.util.List;
 
+import javax.jms.Session;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 
 import ccb.scontact.hibernate.dao.IAccountDao;
@@ -21,6 +24,7 @@ import ccb.scontact.pojo.ErrorInfo;
 import ccb.scontact.pojo.GroupInfo;
 import ccb.scontact.pojo.UserRelationshipInfo;
 import ccb.scontact.utils.GlobalValue;
+import ccb.scontact.utils.StringUtil;
 
 import com.google.gson.Gson;
 
@@ -48,6 +52,7 @@ public class AccountApi {
 			AccountDaoImpl adi = new AccountDaoImpl();
 			result = adi.loginAccount(info);
 			if ( result != null ){
+				
 				return result;
 			}
 		} catch (Exception e) {
@@ -57,6 +62,28 @@ public class AccountApi {
 		return msg;
 	}
 
+	@POST
+	@Path("/loginWithThirdParty")
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseInfo loginWithThirdParty(
+			@QueryParam("json") String loginJson) {
+		AccountInfo info ;
+		BaseInfo result;
+		ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_LOGIN_ERROR);
+		try {
+			info = new Gson().fromJson(loginJson, AccountInfo.class);
+			AccountDaoImpl adi = new AccountDaoImpl();
+			result = adi.loginWithThirdpartyAccount(info);
+			if ( result != null ){
+				return result;
+			}
+		} catch (Exception e) {
+			msg.setMessgae(e.getMessage());
+			return msg;
+		}
+		return msg;
+	}
+	
 	/**
 	 * @param registerJson contain attr:displayName and password
 	 * @return
@@ -76,7 +103,7 @@ public class AccountApi {
 			if ( info != null ){
 				info.setStatus(GlobalValue.USTATUS_NORMAL);
 			}
-			result = adi.createAccount(info);
+			result = adi.createAccount(info,false);
 			if ( result != null ){
 				return result;
 			}
@@ -134,6 +161,32 @@ public class AccountApi {
 			info = new Gson().fromJson(json, AccountInfo.class);
 			if ( info != null ){
 				result = adi.deleteAccountInfo(info.getId());
+			}
+			if ( result == null ){
+				return msg;
+			} else {
+				return result;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			msg.setMessgae(e.getMessage());
+			return msg;
+		}
+	}
+	
+	@POST
+	@Path("/update")
+	@Produces(MediaType.APPLICATION_JSON)
+	public BaseInfo updateAccount(
+			@QueryParam("json") String json) {
+ 		AccountInfo info;
+ 		BaseInfo  result = null;
+ 		AccountDaoImpl adi = new AccountDaoImpl();
+ 		ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_ACCOUNT_INVALID);
+ 		try {
+			info = new Gson().fromJson(json, AccountInfo.class);
+			if ( info != null ){
+				result = adi.updateAccount(info);
 			}
 			if ( result == null ){
 				return msg;
@@ -230,7 +283,11 @@ public class AccountApi {
  		ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_INVALID_REQUEST);
  		try {
 			if ( query != null ){
-				return adi.searchAccountInfo(query, true);
+				//构造查询条件
+				AccountInfo info = new AccountInfo();
+				info.setDisplayName(query);
+				info.setRealName(query);
+				return adi.searchAccountInfo(info, true);
 			} else {
 				return msg;
 			}

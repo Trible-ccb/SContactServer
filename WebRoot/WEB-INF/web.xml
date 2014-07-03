@@ -2,8 +2,8 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
   <display-name></display-name>
   <servlet>
-    <display-name>Jersey Servlet</display-name>
-    <servlet-name>jersey servlet</servlet-name>
+    <display-name>JerseyServlet</display-name>
+    <servlet-name>jersey_servlet</servlet-name>
     <servlet-class>
   		com.sun.jersey.spi.container.servlet.ServletContainer
   	</servlet-class>
@@ -12,12 +12,19 @@
         <param-value>ccb.jersey.resources</param-value>  
     </init-param>
     <load-on-startup>1</load-on-startup>
-    
   </servlet>
   <servlet-mapping>
-    <servlet-name>jersey servlet</servlet-name>
+    <servlet-name>jersey_servlet</servlet-name>
     <url-pattern>/services/*</url-pattern>
   </servlet-mapping>
+	<filter>
+	    <filter-name>requestFilter</filter-name>
+	    <filter-class>ccb.scontact.filter.RequestFilter</filter-class>
+	</filter>
+	<filter-mapping>
+	  <filter-name>requestFilter</filter-name>
+	  <servlet-name>jersey_servlet</servlet-name>
+	</filter-mapping>
   <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>

@@ -22,6 +22,7 @@ public class GroupInfo extends BaseInfo implements Serializable{
 
 	private static final long serialVersionUID = 5992369539881658675L;
 	private Integer status,capacity,identify;
+	private int groupMembers;
 
 	private Long createTime,updateTime,id,ownerId;
 	private String displayName,description,type;
@@ -113,6 +114,13 @@ public class GroupInfo extends BaseInfo implements Serializable{
 	@Column(name="group_identify")
 	public Integer getIdentify() {
 		return identify;
+	}
+	@Transient
+	public int getGroupMembers() {
+		return groupMembers;
+	}
+	public void setGroupMembers(int groupMembers) {
+		this.groupMembers = groupMembers;
 	}
 	/**
 	 * @param identify : 0 or null no identify ,1 need identify msg when user join in 

@@ -8,19 +8,15 @@ import ccb.scontact.pojo.ErrorInfo;
  * @author Trible Chen
  *
  */
-/**
- * @author Trible Chen
- *
- */
 public class GlobalValue {
 
 	//do not forget add MESSAGE when adding message info 
 	public static final int CODE_SERVER_ERROR = 1000;
 	public static final int CODE_TIME_OUT = 1001;
 	public static final int CODE_INVALID_REQUEST = 1002;
-	public static final String STR_SERVER_ERROR = "SERVER ERROR";
-	public static final String STR_TIME_OUT = "TIME OUT";
-	public static final String STR_INVALID_REQUEST = "INVALID REQUEST";
+	public static final String STR_SERVER_ERROR = "服务器错误";
+	public static final String STR_TIME_OUT = "超时";
+	public static final String STR_INVALID_REQUEST = "无效请求";
 	
 	//for users
 	private static final int CODE_USER_LEVEL = 2000;
@@ -31,31 +27,31 @@ public class GlobalValue {
 	public static final int CODE_DELETE_ERROR = 2005;
 	public static final int CODE_GET_ACCOUNT_ERROR = 2006;
 	
-	public static final String STR_LOGIN_ERROR  = "LOGIN ERROR";
-	public static final String STR_REGISTER_ERROR = "REGISTER ERROR";
-	public static final String STR_NAME_UNAVAILABAL = "NAME UNAVAILABAL";
-	public static final String STR_ACCOUNT_INVALID = "ACCOUNT IS INVALID";
-	public static final String STR_DELETE_ERROR  = "DELETE ERROR";
-	public static final String STR_GET_ACCOUNT_ERROR = "GET ACCOUNT ERROR";
+	public static final String STR_LOGIN_ERROR  = "登录失败";
+	public static final String STR_REGISTER_ERROR = "注册失败";
+	public static final String STR_NAME_UNAVAILABAL = "用户名被占用";
+	public static final String STR_ACCOUNT_INVALID = "无效账户";
+	public static final String STR_DELETE_ERROR  = "删除失败";
+	public static final String STR_GET_ACCOUNT_ERROR = "获取用户信息失败";
 	
 	
 	// for contacts
 	public static final int CODE_CONTACT_ERROR = 3000;
-	public static final String STR_CONTACT_ERROR  = "CONTACT ERROR";
+	public static final String STR_CONTACT_ERROR  = "联系方式错误";
 	
 	// for groups
 	public static final int CODE_GROUP_ERROR = 4000;
 	public static final int CODE_TO_MAX_ERROR = 4001;
-	public static final String STR_GROUP_ERROR  = "GROUP ERROR";
-	public static final String STR_TO_MAX_ERROR  = "ERROR:The number of your groups had reached max";
+	public static final String STR_GROUP_ERROR  = "群组错误";
+	public static final String STR_TO_MAX_ERROR  = "你创建的群组个数已达最大值";
 	// for groups and contacts relationship
 	public static final int CODE_PHONE_GROUP_ERROR = 5000;
-	public static final String STR_PHONE_GROUP_ERROR  = "ERROR BETWEEN PHONE AND GROUP";
+	public static final String STR_PHONE_GROUP_ERROR  = "建立关系失败";
 	
 	
 	// for group validate
 		public static final int CODE_VALIDATE_ERROR = 1;
-		public static final String STR_VALIDATE_ERROR  = "VALIDATE ERROR";
+		public static final String STR_VALIDATE_ERROR  = "验证错误";
 	
 	
 	public static HashMap<String, ErrorInfo> MESSAGES = new HashMap<String, ErrorInfo>();
@@ -107,6 +103,7 @@ public class GlobalValue {
 //	status : 0 used, 1 deleted.
 	public static final Integer CSTATUS_USED = 0;
 	public static final Integer CSTATUS_DELETED = 1;
+	public static final Integer CSTATUS_UNUSED = 2;
 	public static final Integer CSTATUS_NULL = CSTATUS_USED;
 	
 //	contact types values;
@@ -163,7 +160,7 @@ public class GlobalValue {
 		CREATE_GROUP_NUMBERS_RULE.put(UTYPE_DEV, Integer.MAX_VALUE);
 		CREATE_GROUP_NUMBERS_RULE.put(UTYPE_LEVEL2,Integer.MAX_VALUE);
 		CREATE_GROUP_NUMBERS_RULE.put(UTYPE_LEVEL1, 20);
-		CREATE_GROUP_NUMBERS_RULE.put(UTYPE_NORMAL,3);
+		CREATE_GROUP_NUMBERS_RULE.put(UTYPE_NORMAL,5);
 		CREATE_GROUP_NUMBERS_RULE.put(UTYPE_NULL, 3);
 		
 		GROUP_CAPACITY_RULE.put(GTYPE_DEV, 2000);

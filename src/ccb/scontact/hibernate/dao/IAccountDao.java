@@ -9,12 +9,18 @@ public interface IAccountDao {
 
 	String TABLE_NAME = "usersinfo";
 	
-	BaseInfo createAccount(AccountInfo info);
+	/**
+	 * @param info
+	 * @param updateIfNeed if the account existed , update it. otherwise return created error 
+	 * @return
+	 */
+	BaseInfo createAccount(AccountInfo info,boolean updateIfNeed);
 	BaseInfo updateAccount(AccountInfo info);
 	BaseInfo loginAccount(AccountInfo info);
+	BaseInfo loginWithThirdpartyAccount(AccountInfo info);
 	BaseInfo getAccountInfo(Long id);
 	BaseInfo deleteAccountInfo(Long id);
-	List<AccountInfo> searchAccountInfo(String query,boolean like);
+	List<AccountInfo> searchAccountInfo(AccountInfo info,boolean like);
 	List<AccountInfo> getAllAccount();
 	List<AccountInfo> getAccountsOfGroup(Long gid);
 	List<AccountInfo> getFriendsOfUser(Long uid);

@@ -1,6 +1,7 @@
 package ccb.scontact.hibernate.dao.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -13,6 +14,7 @@ import ccb.scontact.pojo.AccountInfo;
 import ccb.scontact.pojo.BaseInfo;
 import ccb.scontact.pojo.ContactInfo;
 import ccb.scontact.utils.GlobalValue;
+import ccb.scontact.utils.ListUtil;
 import ccb.scontact.utils.StringUtil;
 
 public class ContactDaoImpl implements IContactDao {
@@ -31,7 +33,8 @@ public class ContactDaoImpl implements IContactDao {
 					List<ContactInfo> exitContacts = getUsersContact(info.getUserId());
 					if ( exitContacts != null ){
 						for ( ContactInfo ec: exitContacts ){
-							if ( info.getContact().equals(ec.getContact()) ){
+							if ( info.getContact().equals(ec.getContact())
+									&& ec.getType().equals(info.getType()) ){
 								return ec;//return already exist the same ContactInfo
 							}
 						}
@@ -74,8 +77,8 @@ public class ContactDaoImpl implements IContactDao {
 			@Override
 			public BaseInfo handleSession(Session s) {
 				String hql = "FROM ContactInfo "  
-		        		 + " WHERE id ='" + id + "'";
-		         Query query = s.createQuery(hql);
+		        		 + " WHERE id =:id";
+		         Query query = s.createQuery(hql).setParameter("id", id);
 		         return (BaseInfo)query.uniqueResult();  
 			}
 		});
@@ -102,15 +105,14 @@ public class ContactDaoImpl implements IContactDao {
 	}
 
 	@Override
-	public List<ContactInfo> searchContactInfo(final String query) {
-		if ( !StringUtil.isValidName(query) )return null;
+	public List<ContactInfo> searchContactInfo(final String queryStr) {
 		List<ContactInfo> result = null;
 		result = DaoImplHelper.doTask(new IDaoHandler<List<ContactInfo>>() {
 			@Override
 			public List<ContactInfo> handleSession(Session s) {
 				String hql = "FROM ContactInfo "  
-		        		 + " WHERE phone_number like '" + query + "'";
-		         Query query = s.createQuery(hql);
+		        		 + " WHERE phone_number like :query";
+		         Query query = s.createQuery(hql).setParameter("query", queryStr+"%");
 		         return query.list();  
 			}
 		});
@@ -126,7 +128,7 @@ public class ContactDaoImpl implements IContactDao {
 			public List<ContactInfo> handleSession(Session s) {
 				String hql = "FROM ContactInfo";    
 		         Query query = s.createQuery(hql);    
-		         query.setCacheable(true); // ���û���    
+		         query.setCacheable(true);  
 		         List<ContactInfo> uesrs = query.list();
 				return uesrs;
 			}
@@ -142,15 +144,30 @@ public class ContactDaoImpl implements IContactDao {
 			@Override
 			public List<ContactInfo> handleSession(Session s) {
 				String hql = " FROM ContactInfo"
-						+ " WHERE user_id = '" + uid + "'"
+						+ " WHERE user_id =:id"
 						+ " AND status <> '" + GlobalValue.CSTATUS_DELETED + "'";    
-		         Query query = s.createQuery(hql);    
+		         Query query = s.createQuery(hql).setParameter("id", uid);    
 		         query.setCacheable(true);  
 		         List<ContactInfo> uesrs = query.list();
 				return uesrs;
 			}
 		});
 		return results;
+	}
+
+	@Override
+	public List<ContactInfo> getContactInfosByContactString(String contactids) {
+		List<Long> contactIds = ContactInfo.stringToList(contactids);
+		 List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+		 if ( ListUtil.isNotEmpty(contactIds) ){
+			 for ( Long id : contactIds ){
+				 BaseInfo tmp = getContactInfo(id);
+				 if ( tmp instanceof ContactInfo ){
+					 contacts.add((ContactInfo) tmp);
+				 }
+			 }
+		 }
+		return contacts;
 	}
 
 }

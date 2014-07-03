@@ -1,10 +1,16 @@
 package ccb.scontact.utils;
 
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringUtil {
 
+	public static boolean isEmpty(String s){
+		if ( s == null || s.trim().equals(""))return true;
+		return false;
+	}
 	public static boolean isValidName(String name){
 		return name == null ? false : name.matches("[^\"'%*]+");
 	}
@@ -46,7 +52,28 @@ public class StringUtil {
 			return false;
 		}
 	}
-	
+	public static String getEncodeURLParams(String v){
+		Bog.v("before encode v = " + v);
+		String ev = null;
+		try {
+			ev = URLEncoder.encode(v, "UTF-8");
+			Bog.v("after encode v = " + ev);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ev;
+	}
+	public static String getDecodeURLParams(String v){
+		Bog.v("before Decode v = " + v);
+		String ev = null;
+		try {
+			ev = URLDecoder.decode(v, "UTF-8");
+			Bog.v("after Decode v = " + ev);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ev;
+	}
 	public static void main(String[] args){
 		String testName ="+861232";
 		Bog.v(testName + " isValidName "+ isValidName(testName));

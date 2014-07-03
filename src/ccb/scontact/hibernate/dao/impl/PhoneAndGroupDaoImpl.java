@@ -6,12 +6,16 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
+import ccb.scontact.hibernate.dao.IAccountDao;
 import ccb.scontact.hibernate.dao.IGroupDao;
 import ccb.scontact.hibernate.dao.IPhoneAndGroupDao;
 import ccb.scontact.hibernate.dao.impl.DaoImplHelper.IDaoHandler;
+import ccb.scontact.notify.SimpleNotifyer;
+import ccb.scontact.pojo.AccountInfo;
 import ccb.scontact.pojo.BaseInfo;
 import ccb.scontact.pojo.ContactInfo;
 import ccb.scontact.pojo.ErrorInfo;
+import ccb.scontact.pojo.GroupInfo;
 import ccb.scontact.pojo.PhoneAndGroupInfo;
 import ccb.scontact.utils.GlobalValue;
 import ccb.scontact.utils.ListUtil;
@@ -29,10 +33,15 @@ public class PhoneAndGroupDaoImpl implements IPhoneAndGroupDao{
 			@Override
 			public BaseInfo handleSession(Session s) {
 //				TODO maybe need to check the validation of group and user
+				IAccountDao iad = new AccountDaoImpl();
+				BaseInfo user = iad.getAccountInfo(info.getUserId());
+				IGroupDao igd = new GroupDaoImpl();
+				BaseInfo group = igd.getGroupInfo(info.getGroupId());
 				ErrorInfo msg = GlobalValue.MESSAGES.get(GlobalValue.STR_PHONE_GROUP_ERROR);
 				//check whether the contact exist
 				BaseInfo pag = checkPhoneAndGroupInfo(info);
-				if ( !(pag instanceof ErrorInfo) ){
+				if ( !(pag instanceof ErrorInfo) 
+						&& user instanceof AccountInfo && group instanceof GroupInfo){
 					List<Long> contacts = ContactInfo.stringToList(info.getContactIds());
 					if ( ListUtil.isEmpty(contacts) ){//do not allow empty contacts
 						return msg;
@@ -98,9 +107,12 @@ public class PhoneAndGroupDaoImpl implements IPhoneAndGroupDao{
 			@Override
 			public BaseInfo handleSession(Session s) {
 				String hql = " FROM PhoneAndGroupInfo"
-						+ " WHERE group_id = '" + info.getGroupId() + "'"
-						+ " AND user_id = '" + info.getUserId() + "'";
-				return (BaseInfo) s.createQuery(hql).uniqueResult();
+						+ " WHERE group_id =:gid"
+						+ " AND user_id =:uid";
+				return (BaseInfo) s.createQuery(hql)
+						.setParameter("gid", info.getGroupId())
+						.setParameter("uid", info.getUserId())
+						.uniqueResult();
 			}
 		});
 		return result;
@@ -114,9 +126,9 @@ public class PhoneAndGroupDaoImpl implements IPhoneAndGroupDao{
 			@Override
 			public List<PhoneAndGroupInfo> handleSession(Session s) {
 				String hql = " FROM PhoneAndGroupInfo"
-						+ " WHERE group_id = '" + gid + "'";
-		         Query query = s.createQuery(hql);    
-		         query.setCacheable(true); // ���û���    
+						+ " WHERE group_id =:gid";
+		         Query query = s.createQuery(hql).setParameter("gid", gid);    
+		         query.setCacheable(true); 
 		         List<PhoneAndGroupInfo> uesrs = query.list();
 				return uesrs;
 			}
@@ -132,9 +144,11 @@ public class PhoneAndGroupDaoImpl implements IPhoneAndGroupDao{
 			@Override
 			public PhoneAndGroupInfo handleSession(Session s) {
 				String hql = " FROM PhoneAndGroupInfo"
-						+ " WHERE user_id = '" + uid + "'"
-						+ " AND group_id = '" + gid + "'";
-		         Query query = s.createQuery(hql);    
+						+ " WHERE user_id =:uid"
+						+ " AND group_id =:gid";
+		         Query query = s.createQuery(hql)
+						        		 .setParameter("uid", uid)
+						        		 .setParameter("gid", gid);    
 		         query.setCacheable(true);  
 		         PhoneAndGroupInfo uesrs = (PhoneAndGroupInfo) query.uniqueResult();
 				return uesrs;
@@ -150,8 +164,8 @@ public class PhoneAndGroupDaoImpl implements IPhoneAndGroupDao{
 			@Override
 			public List<PhoneAndGroupInfo> handleSession(Session s) {
 				String hql = " FROM PhoneAndGroupInfo"
-						+ " WHERE user_id = '" + uid + "'";
-		         Query query = s.createQuery(hql);    
+						+ " WHERE user_id =uid";
+		         Query query = s.createQuery(hql).setParameter("uid", uid);    
 		         query.setCacheable(true); 
 		         List<PhoneAndGroupInfo> uesrs = query.list();
 				return uesrs;

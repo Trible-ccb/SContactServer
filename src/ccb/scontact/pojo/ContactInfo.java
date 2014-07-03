@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import ccb.scontact.hibernate.dao.IContactDao;
+import ccb.scontact.utils.GlobalValue;
 import ccb.scontact.utils.StringUtil;
 
 @Entity
@@ -29,11 +30,14 @@ public class ContactInfo extends BaseInfo implements Serializable{
 	private Long userId;
 	private String contact;
 	private Integer status;
-	private Long lastestUsedTime;
+	private long lastestUsedTime;
 	private String type;
 	
 	@Column(name = "type")
 	public String getType() {
+		if ( type == null ){
+			return GlobalValue.CTYPE_PHONE;
+		}
 		return type;
 	}
 	public void setType(String type) {
@@ -58,7 +62,7 @@ public class ContactInfo extends BaseInfo implements Serializable{
 		this.userId = userId;
 	}
 	
-	@Column(name="phone_number")
+	@Column(name="contact_string")
 	public String getContact() {
 		return contact;
 	}
@@ -77,10 +81,10 @@ public class ContactInfo extends BaseInfo implements Serializable{
 		this.status = status;
 	}
 	@Column(name="latest_used_time")
-	public Long getLastestUsedTime() {
+	public long getLastestUsedTime() {
 		return lastestUsedTime;
 	}
-	public void setLastestUsedTime(Long lastestUsedTime) {
+	public void setLastestUsedTime(long lastestUsedTime) {
 		this.lastestUsedTime = lastestUsedTime;
 	}
 	@Transient

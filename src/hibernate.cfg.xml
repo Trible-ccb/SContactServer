@@ -10,14 +10,28 @@
 	<property name="dialect">
 		org.hibernate.dialect.MySQLDialect
 	</property>
-
+	
+	<!-- test 
 	<property name="connection.url">
 		jdbc:mysql://localhost:1206/social_contact
 	</property>
 	<property name="connection.username">trible-ccb</property>
 	<property name="connection.password">trible_ccb</property>
-
-
+	-->
+	<!-- SAE DB 
+	<property name="connection.url">
+		jdbc:mysql://w.rdc.sae.sina.com.cn:3307/app_scontact
+	</property>
+	<property name="connection.username">yx34kywo53</property>
+	<property name="connection.password">2j423yw2lx1hihzzxx4jhmkzillwwhh5200l40h2</property>
+	-->
+	<!-- Nie ming DB -->
+	<property name="connection.url">
+		jdbc:mysql://localhost:3306/social_contact?characterEncoding=utf8
+	</property>
+	<property name="connection.username">root</property>
+	<property name="connection.password">root</property>
+	
 	<property name="connection.driver_class">
 		com.mysql.jdbc.Driver
 	</property>
@@ -25,7 +39,9 @@
 		com.mysql.jdbc.Driver
 	</property>
 	<property name="format_sql">true</property>
+	<!-- 
 	<property name="show_sql">true</property>
+	-->
 	<property name="current_session_context_class">thread</property>
 
 	<mapping class="ccb.scontact.pojo.AccountInfo" />

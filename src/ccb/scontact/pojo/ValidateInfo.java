@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import ccb.scontact.hibernate.dao.IGroupValidateDao;
+import ccb.scontact.hibernate.dao.IValidateDao;
 
 /**
  * @author modify by Trible Chen
@@ -21,7 +21,7 @@ import ccb.scontact.hibernate.dao.IGroupValidateDao;
  *or friendship between user and user 
  */
 @Entity
-@Table(name=IGroupValidateDao.TABLE_NAME)
+@Table(name=IValidateDao.TABLE_NAME)
 @XmlRootElement
 public class ValidateInfo extends BaseInfo {
 
@@ -30,7 +30,13 @@ public class ValidateInfo extends BaseInfo {
 	private String contact_ids;
 	private Long groupId;
 	private Long end_user_id;
-	private String is_group_to_user;
+	private int is_group_to_user;
+	private long createTime;
+	
+	private AccountInfo startUser,endUser;
+	private GroupInfo groupInfo;
+	List<ContactInfo> contactsList;
+	
 	
 	@GenericGenerator(name = "generator", strategy = "increment")
 	@Id
@@ -43,7 +49,7 @@ public class ValidateInfo extends BaseInfo {
 		this.id = id;
 	}
 	
-	@Column(name = "start_user_id", nullable = false)
+	@Column(name = "start_user_id" )
 	public Long getStart_user_id() {
 		return start_user_id;
 	}
@@ -51,7 +57,7 @@ public class ValidateInfo extends BaseInfo {
 		this.start_user_id = start_user_id;
 	}
 	
-	@Column(name = "end_user_id", nullable = false)
+	@Column(name = "end_user_id" )
 	public Long getEnd_user_id() {
 		return end_user_id;
 	}
@@ -60,10 +66,10 @@ public class ValidateInfo extends BaseInfo {
 	}
 	
 	@Column(name = "is_group_to_user")
-	public String getIs_group_to_user() {
+	public int getIs_group_to_user() {
 		return is_group_to_user;
 	}
-	public void setIs_group_to_user(String is_group_to_user) {
+	public void setIs_group_to_user(int is_group_to_user) {
 		this.is_group_to_user = is_group_to_user;
 	}
 	
@@ -82,16 +88,42 @@ public class ValidateInfo extends BaseInfo {
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
 	}
-	
-	private List<ValidateInfo> GroupValidateInfoList;
-
-
+	@Column(name = "create_time")
+	public long getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(long createTime) {
+		this.createTime = createTime;
+	}
 	@Transient
-	public List<ValidateInfo> getGroupValidateInfoList() {
-		return GroupValidateInfoList;
+	public AccountInfo getStartUser() {
+		return startUser;
 	}
-	public void setGroupValidateInfoList(
-			List<ValidateInfo> groupValidateInfoList) {
-		GroupValidateInfoList = groupValidateInfoList;
+	public void setStartUser(AccountInfo startUser) {
+		this.startUser = startUser;
 	}
+	@Transient
+	public AccountInfo getEndUser() {
+		return endUser;
+	}
+	public void setEndUser(AccountInfo endUser) {
+		this.endUser = endUser;
+	}
+	@Transient
+	public GroupInfo getGroupInfo() {
+		return groupInfo;
+	}
+	public void setGroupInfo(GroupInfo groupInfo) {
+		this.groupInfo = groupInfo;
+	}
+	
+	@Transient
+	public List<ContactInfo> getContactsList() {
+		return contactsList;
+	}
+	public void setContactsList(List<ContactInfo> contactsList) {
+		this.contactsList = contactsList;
+	}
+	
+	
 }

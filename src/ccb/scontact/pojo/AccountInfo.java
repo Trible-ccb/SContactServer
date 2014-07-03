@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.hibernate.annotations.GenericGenerator;
 
 import ccb.scontact.hibernate.dao.IAccountDao;
+import ccb.scontact.utils.SecurityMethod;
 import ccb.scontact.utils.StringUtil;
 
 @Entity
@@ -25,7 +26,7 @@ public class AccountInfo extends BaseInfo implements Serializable{
 	private Integer status,gender;
 	Long birthday,createTime,id;
 	private String displayName,phoneNumber ,photoUrl,
-	email,realName,description,type,password,cookie;
+	email,realName,description,type,password,cookie,notifyId,thirdPartyId;
 
 	private List<ContactInfo> contactsList;
 	
@@ -136,6 +137,22 @@ public class AccountInfo extends BaseInfo implements Serializable{
 	}
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	@Column(name="user_notify_id")
+	public String getNotifyId() {
+		return notifyId;
+	}
+	public void setNotifyId(String notifyId) {
+		this.notifyId = notifyId;
+	}
+	
+	@Column(name="user_third_usid")
+	public String getThirdPartyId() {
+		return thirdPartyId;
+	}
+	public void setThirdPartyId(String thirdPartyId) {
+		this.thirdPartyId = thirdPartyId;
 	}
 	
 	@Column(name="user_cookie")

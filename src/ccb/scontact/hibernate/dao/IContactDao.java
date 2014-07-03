@@ -16,4 +16,5 @@ public interface IContactDao {
 	List<ContactInfo> searchContactInfo(String query);
 	List<ContactInfo> getAllContact();
 	List<ContactInfo> getUsersContact(Long uid);
+	List<ContactInfo> getContactInfosByContactString(String contactids);
 }
