@@ -23,23 +23,23 @@ public  class SimpleNotifyer implements INotify {
 		return null;
 	}
 	@Override
-	public void notifyOne(String uid, String title, String content) {
+	public String notifyOne(String uid, String title, String content) {
 		if ( StringUtil.isEmpty(uid) ){
 			System.out.println("notify id null");
-			return;
+			return null;
 		}
 		String a = getOpenAction();
 		String t = TYPE_UNICAST;
-		notify(t, uid, title, content, a);
+		return notify(t, uid, title, content, a);
 	}
 
 	@Override
-	public void notifyAll(String title, String content) {
+	public String notifyAllPerson(String title, String content) {
 		String a = getOpenAction();
 		String t = TYPE_BOARDCAST;
-		notify(t,"", title, content, a);
+		return notify(t,"", title, content, a);
 	}
-	private void notify(String type , String uid, String title, String content,String actionTarget) {
+	private String notify(String type , String uid, String title, String content,String actionTarget) {
 		
 		String timestamp = System.currentTimeMillis()+"";
 		String validation_token = DigestUtils.md5Hex(appkey.toLowerCase() + appMasterSecret.toLowerCase() + timestamp);
@@ -80,6 +80,6 @@ public  class SimpleNotifyer implements INotify {
 		param.add("payload", messagebody);
 		param.addProperty("description", description);
 		
-		URLUtil.sendPost(url, param);
+		return URLUtil.sendPost(url, param);
 	}
 }

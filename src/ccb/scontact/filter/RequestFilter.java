@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import ccb.scontact.hibernate.dao.IAccountDao;
 import ccb.scontact.hibernate.dao.impl.AccountDaoImpl;
 import ccb.scontact.pojo.AccountInfo;
+import ccb.scontact.utils.Bog;
 
 public class RequestFilter implements Filter{
 
@@ -28,19 +29,24 @@ public class RequestFilter implements Filter{
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
+		
+		String dispstr = "/services/error/message";
+		Cookie[] cookies = null;
+		String uri = null;
+		HttpServletRequest req = null;
+		String cookievalue = null;
+		
+		if ( request instanceof HttpServletRequest ){
+			req = (HttpServletRequest) request;
+			cookies = req.getCookies();
+			uri = req.getRequestURI();
+			Bog.info("<requesturi>"+uri+ "<cookie>"+getCookieString(cookies));
+		}
 		if ( !enableFilter ){
 			chain.doFilter(request, response);
 			return;
 		} 
-		String dispstr = "/services/error/message";
-		HttpServletRequest req = null;
-		if ( request instanceof HttpServletRequest ){
-			req = (HttpServletRequest) request;
-		}
-		String cookievalue = null;
 		if ( req != null ){
-			Cookie[] cookies = req.getCookies();
-			String uri = req.getRequestURI();
 			if ( !uri.contains("login") ){
 				if ( cookies != null && cookies.length > 0 ){
 					String name = cookies[0].getName();
@@ -58,8 +64,8 @@ public class RequestFilter implements Filter{
 							}
 						}catch (Exception e) {
 							e.printStackTrace();
+							Bog.error("<requesturi>"+uri+ "<cookie>"+getCookieString(cookies)+ "<exception>"+e.getMessage());
 						}
-						
 					}
 				}
 			} else {//登录接口不拦截
@@ -75,6 +81,14 @@ public class RequestFilter implements Filter{
 		disp.forward(request, response);
 	}
 
+	String getCookieString (Cookie[] s){
+		if ( s == null )return null;
+		StringBuffer sb = new StringBuffer();
+		for ( Cookie c : s ){
+			sb.append(c.getValue());
+		}
+		return sb.toString();
+	}
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}

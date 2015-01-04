@@ -5,6 +5,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import ccb.scontact.hibernate.HibernateSessionFactory;
+import ccb.scontact.utils.Bog;
 
 public class DaoImplHelper{
 	
@@ -25,7 +26,8 @@ public class DaoImplHelper{
         	if ( t != null ){
         		t.rollback();  
         	}
-	        err.printStackTrace();  
+	        err.printStackTrace(); 
+	        Bog.fetal("<handlerTransaction>"+t+ "<Exception>"+err.getMessage());
         }finally{  
         	s.close();  
         }

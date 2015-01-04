@@ -94,10 +94,20 @@ public class ValidateApi {
 	@POST
 	@Path("/testNotify")
 	@Produces(MediaType.APPLICATION_JSON)
-	public void testNotify()
+	public String testNotify()
 	{
 		INotify no = new SimpleNotifyer();
-		no.notifyOne("AqdvUJRGtWrlnnX-5YY87DqGDRMTa2RNYRSqkRp4HolC","个人消息提示", "你有新通知");
+		return no.notifyOne("AqdvUJRGtWrlnnX-5YY87DqGDRMTa2RNYRSqkRp4HolC","个人消息提示", "你有新通知");
+//		no.notifyAll("测试标题", "测试内容");
+	}
+	
+	@POST
+	@Path("/testNotifyAll")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String testNotifyAll()
+	{
+		INotify no = new SimpleNotifyer();
+		return no.notifyAllPerson("测试标题", "测试内容");
 	}
 	
 	@POST
@@ -249,18 +259,20 @@ public class ValidateApi {
 					result = iurd.addOrUpdateRelationshipBetweenUser(uri);
 					result = iurd.addOrUpdateRelationshipBetweenUser(uri2);
 					
-					BaseInfo user = new AccountDaoImpl().getAccountInfo(info.getEnd_user_id());
+					BaseInfo user = new AccountDaoImpl().getAccountInfo(info.getStart_user_id());
+					AccountInfo u1 = null;
+					BaseInfo user2 = new AccountDaoImpl().getAccountInfo(info.getEnd_user_id());
+					AccountInfo u2 = null;
+					
 					if ( user instanceof AccountInfo ){
-						SimpleNotifyer notifyer = new SimpleNotifyer();
-						AccountInfo u = ((AccountInfo)user);
-						notifyer.notifyOne(u.getNotifyId(), SimpleNotifyer.TITLE, "你和" + u.getDisplayName() +"成为了好友");
+						u1 = ((AccountInfo)user);
 					}
-					BaseInfo user2 = new AccountDaoImpl().getAccountInfo(info.getStart_user_id());
 					if ( user2 instanceof AccountInfo ){
-						SimpleNotifyer notifyer = new SimpleNotifyer();
-						AccountInfo u = ((AccountInfo)user2);
-						notifyer.notifyOne(u.getNotifyId(), SimpleNotifyer.TITLE, "你和" + u.getDisplayName() +"成为了好友");
+						u2 = ((AccountInfo)user2);
 					}
+					SimpleNotifyer notifyer = new SimpleNotifyer();
+					notifyer.notifyOne(u2.getNotifyId(), SimpleNotifyer.TITLE, "你和" + u1.getDisplayName() +"成为了好友");
+					notifyer.notifyOne(u1.getNotifyId(), SimpleNotifyer.TITLE, "你和" + u2.getDisplayName() +"成为了好友");
 				}
 				if ( result != null ){
 					if ( !(result instanceof ErrorInfo) ){
